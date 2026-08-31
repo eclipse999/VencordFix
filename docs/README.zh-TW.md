@@ -56,14 +56,14 @@
 ## 🔄 運作流程圖
 
 ```mermaid
-graph TD
-    A[點擊啟動 Discord 捷徑 / 執行 VencordFix] --> B{檢查本機 Discord 最新版本}
-    B -->|已修補 Vencord| C[直接秒速啟動 Discord]
-    B -->|尚未修補 / 剛自動更新| D[關閉運作中的 Discord 程序]
-    D --> E[自 GitHub 下載最新 VencordInstallerCli.exe]
-    E --> F[執行自動修補 -install]
-    F --> G[刪除下載的暫存安裝檔]
-    G --> H[啟動 Discord 並載入 Vencord]
+flowchart TD
+    A["🚀 點擊捷徑 / 執行 VencordFix"] --> B{"🔍 檢查本機 Discord<br/>修補狀態"}
+    B -->|"✅ 已修補 Vencord"| C["⚡ 秒速啟動 Discord<br/>(耗時 &lt; 10ms，無延遲)"]
+    B -->|"❌ 尚未修補 / 剛自動更新"| D["🛑 關閉運作中的<br/>Discord 程序"]
+    D --> E["⬇️ 從官方 GitHub 下載<br/>最新 VencordInstallerCli.exe"]
+    E --> F["🔧 執行自動修補<br/>(-install)"]
+    F --> G["🧹 自動刪除<br/>暫存安裝檔 (100% 無痕)"]
+    G --> H["✨ 啟動 Discord<br/>(成功載入 Vencord)"]
 ```
 
 ---

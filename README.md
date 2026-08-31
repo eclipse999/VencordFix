@@ -60,14 +60,14 @@ Whenever Discord updates itself in the background on Windows, its Squirrel updat
 ## 🔄 How It Works
 
 ```mermaid
-graph TD
-    A[Click Discord Shortcut / Run VencordFix] --> B{Check Latest Discord Version}
-    B -->|Already Patched| C[Launch Discord Instantly < 10ms]
-    B -->|Unpatched / Updated| D[Close Running Discord Processes]
-    D --> E[Download latest VencordInstallerCli.exe from GitHub]
-    E --> F[Run -install command]
-    F --> G[Delete Temporary Installer File]
-    G --> H[Launch Discord with Vencord Active]
+flowchart TD
+    A["🚀 Launch Shortcut / Run VencordFix"] --> B{"🔍 Check Discord<br/>Patch Status"}
+    B -->|"✅ Already Patched"| C["⚡ Instant Launch Discord<br/>(&lt; 10ms, No Delay)"]
+    B -->|"❌ Unpatched / Just Updated"| D["🛑 Close Running Discord<br/>Processes"]
+    D --> E["⬇️ Download Latest<br/>VencordInstallerCli.exe"]
+    E --> F["🔧 Run Auto-Patch<br/>(-install)"]
+    F --> G["🧹 Clean Up & Delete<br/>Temporary Installer"]
+    G --> H["✨ Launch Discord<br/>with Vencord Active"]
 ```
 
 ---
