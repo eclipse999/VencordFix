@@ -43,7 +43,8 @@ vencord-autopatcher/
 ├── scripts/                        # 輔助一鍵設定腳本
 │   ├── Install-Shortcut.bat        # 一鍵在桌面建立 Discord (Vencord) 捷徑
 │   ├── Install-Startup-Watcher.bat # 一鍵將背景監控加入開機自動啟動
-│   └── Uninstall.bat               # 移除捷徑與開機設定
+│   ├── Uninstall-Startup-Watcher.bat # 一鍵移除開機自動監控設定
+│   └── Test-Cleanup-Verification.ps1 # 暫存檔自動無痕清理驗證腳本
 │
 ├── VencordAutoPatcher.ps1          # 核心 PowerShell 自動化腳本
 ├── Run-Patcher.bat                 # 一鍵雙擊執行修補與啟動
@@ -71,7 +72,7 @@ vencord-autopatcher/
 1. 雙擊執行 `scripts\Install-Startup-Watcher.bat`。
 2. 程式會在 Windows 開機時於背景靜默監控 Discord 目錄，一旦 Discord 下載新版本，程式會即時在背景完成 Vencord 修補。
 
-> 若日後想取消開機啟動，只需執行 `scripts\Uninstall.bat`。
+> 若日後想取消開機啟動，只需執行 `scripts\Uninstall-Startup-Watcher.bat`。
 
 ---
 
