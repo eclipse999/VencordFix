@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -298,33 +299,22 @@ namespace VencordFix
             NotifyIcon trayIcon = new NotifyIcon();
             trayIcon.Text = "VencordFix 守護中";
             
-            string localIco = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets", "app.ico");
-            if (File.Exists(localIco))
+            string selfExe = Process.GetCurrentProcess().MainModule.FileName;
+            try
             {
-                try
+                Icon extracted = Icon.ExtractAssociatedIcon(selfExe);
+                if (extracted != null)
                 {
-                    trayIcon.Icon = new Icon(localIco);
-                }
-                catch { }
-            }
-            else
-            {
-                var discords = DiscordApp.DetectInstalledDiscords();
-                if (discords.Count > 0 && File.Exists(Path.Combine(discords[0].RootPath, "app.ico")))
-                {
-                    try
-                    {
-                        trayIcon.Icon = new Icon(Path.Combine(discords[0].RootPath, "app.ico"));
-                    }
-                    catch
-                    {
-                        trayIcon.Icon = SystemIcons.Application;
-                    }
+                    trayIcon.Icon = extracted;
                 }
                 else
                 {
                     trayIcon.Icon = SystemIcons.Application;
                 }
+            }
+            catch
+            {
+                trayIcon.Icon = SystemIcons.Application;
             }
 
             ContextMenu contextMenu = new ContextMenu();

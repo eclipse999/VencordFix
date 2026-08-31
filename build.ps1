@@ -47,6 +47,11 @@ Write-Host "正在編譯 VencordFix.exe..." -ForegroundColor Cyan
 Invoke-Expression $cmd
 
 if ($LASTEXITCODE -eq 0 -and (Test-Path $outputExe)) {
+    # 複製 assets 資料夾至 bin 目錄
+    $binAssets = Join-Path $outputDir "assets"
+    if (Test-Path (Join-Path $PSScriptRoot "assets")) {
+        Copy-Item -Path (Join-Path $PSScriptRoot "assets") -Destination $binAssets -Recurse -Force | Out-Null
+    }
     Write-Host "編譯成功: $outputExe" -ForegroundColor Green
     $size = (Get-Item $outputExe).Length / 1KB
     Write-Host "檔案大小: $([math]::Round($size, 2)) KB" -ForegroundColor Gray

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -28,26 +29,28 @@ namespace VencordFix
             this.BackColor = Color.FromArgb(30, 31, 34);
             this.Font = new Font("Segoe UI", 9.5f, FontStyle.Regular);
 
-            // 優先載入 VencordFix 專屬圖示
-            string localIco = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets", "app.ico");
-            if (File.Exists(localIco))
+            // 優先直接提取 VencordFix.exe 內嵌的 Win32 圖示
+            try
             {
-                try
+                string selfExe = Process.GetCurrentProcess().MainModule.FileName;
+                Icon extracted = Icon.ExtractAssociatedIcon(selfExe);
+                if (extracted != null)
+                {
+                    this.Icon = extracted;
+                }
+            }
+            catch
+            {
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string localIco = Path.Combine(baseDir, "assets", "app.ico");
+                string parentIco = Path.Combine(baseDir, "..", "assets", "app.ico");
+                if (File.Exists(localIco))
                 {
                     this.Icon = new Icon(localIco);
                 }
-                catch { }
-            }
-            else
-            {
-                var discords = DiscordApp.DetectInstalledDiscords();
-                if (discords.Count > 0 && File.Exists(Path.Combine(discords[0].RootPath, "app.ico")))
+                else if (File.Exists(parentIco))
                 {
-                    try
-                    {
-                        this.Icon = new Icon(Path.Combine(discords[0].RootPath, "app.ico"));
-                    }
-                    catch { }
+                    this.Icon = new Icon(parentIco);
                 }
             }
 
