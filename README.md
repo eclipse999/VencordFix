@@ -57,12 +57,12 @@ Whenever Discord updates in the background on Windows, its updater creates a new
 
 ```mermaid
 flowchart TD
-    A["Launch Shortcut / Run VencordFix"] --> B{"Discord Patch Status"}
-    B -->|Already Patched| C["Instant Launch Discord<br/>(No delay)"]
-    B -->|Unpatched / Updated| D["Close Running Discord<br/>(Release file locks)"]
-    D --> E["Download Latest<br/>VencordInstallerCli.exe"]
-    E --> F["Run Auto-Patch<br/>(-install)"]
-    F --> G["Delete Temporary Installer<br/>(Clean up temp files)"]
+    A["Start Discord<br/>(Run VencordFix)"] --> B{"Check Discord<br/>Patch Status"}
+    B -->|Already Patched| C["Instant Launch<br/>(&lt; 10ms, no delay)"]
+    B -->|Unpatched / Updated| D["Close Discord<br/>(Release files)"]
+    D --> E["Download Latest<br/>Vencord Installer"]
+    E --> F["Apply Auto-Patch<br/>(-install)"]
+    F --> G["Delete Installer<br/>(Zero-trace cleanup)"]
     G --> H["Launch Discord<br/>(Vencord Active)"]
 ```
 

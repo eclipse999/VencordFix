@@ -57,12 +57,12 @@
 
 ```mermaid
 flowchart TD
-    A["啟動捷徑 / 執行 VencordFix"] --> B{"檢查 Discord 修補狀態"}
-    B -->|已修補| C["直接啟動 Discord<br/>(耗時 &lt; 10ms，無延遲)"]
-    B -->|未修補 / 剛更新| D["關閉運作中的 Discord 程序"]
-    D --> E["下載最新<br/>VencordInstallerCli.exe"]
+    A["啟動 Discord 捷徑<br/>(執行 VencordFix)"] --> B{"檢查 Discord<br/>修補狀態"}
+    B -->|已修補| C["秒速啟動 Discord<br/>(耗時 &lt; 10ms)"]
+    B -->|未修補 / 剛更新| D["關閉運作中的<br/>Discord 程序"]
+    D --> E["下載官方最新<br/>Vencord 安裝檔"]
     E --> F["執行自動修補<br/>(-install)"]
-    F --> G["自動刪除暫存安裝檔<br/>(無痕清理)"]
+    F --> G["刪除暫存安裝檔<br/>(100% 無痕清理)"]
     G --> H["啟動 Discord<br/>(成功載入 Vencord)"]
 ```
 
