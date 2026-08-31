@@ -21,11 +21,13 @@ if (-not (Test-Path $outputDir)) {
 $outputExe = Join-Path $outputDir "VencordFix.exe"
 $srcFiles = (Get-ChildItem -Path (Join-Path $PSScriptRoot "src") -Filter "*.cs").FullName
 
-# 嘗試尋找 Discord 的 app.ico
+# 優先使用 VencordFix 專屬 assets/app.ico
 $iconOption = ""
-$discordIco = "$env:LOCALAPPDATA\Discord\app.ico"
-if (Test-Path $discordIco) {
-    $iconOption = "/win32icon:`"$discordIco`""
+$customIco = Join-Path $PSScriptRoot "assets\app.ico"
+if (Test-Path $customIco) {
+    $iconOption = "/win32icon:`"$customIco`""
+} elseif (Test-Path "$env:LOCALAPPDATA\Discord\app.ico") {
+    $iconOption = "/win32icon:`"$env:LOCALAPPDATA\Discord\app.ico`""
 }
 
 $refs = @(

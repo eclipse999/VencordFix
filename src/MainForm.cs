@@ -28,15 +28,27 @@ namespace VencordFix
             this.BackColor = Color.FromArgb(30, 31, 34);
             this.Font = new Font("Segoe UI", 9.5f, FontStyle.Regular);
 
-            // 嘗試載入 Discord 圖示
-            var discords = DiscordApp.DetectInstalledDiscords();
-            if (discords.Count > 0 && File.Exists(Path.Combine(discords[0].RootPath, "app.ico")))
+            // 優先載入 VencordFix 專屬圖示
+            string localIco = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets", "app.ico");
+            if (File.Exists(localIco))
             {
                 try
                 {
-                    this.Icon = new Icon(Path.Combine(discords[0].RootPath, "app.ico"));
+                    this.Icon = new Icon(localIco);
                 }
                 catch { }
+            }
+            else
+            {
+                var discords = DiscordApp.DetectInstalledDiscords();
+                if (discords.Count > 0 && File.Exists(Path.Combine(discords[0].RootPath, "app.ico")))
+                {
+                    try
+                    {
+                        this.Icon = new Icon(Path.Combine(discords[0].RootPath, "app.ico"));
+                    }
+                    catch { }
+                }
             }
 
             // 標題

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Drawing;
@@ -12,6 +13,12 @@ namespace VencordFix
         [STAThread]
         static void Main(string[] args)
         {
+            try
+            {
+                Console.OutputEncoding = Encoding.UTF8;
+            }
+            catch { }
+
             // 若沒有傳入任何參數，預設開啟極簡 GUI 設定視窗
             if (args.Length == 0)
             {
@@ -55,7 +62,6 @@ namespace VencordFix
                 }
                 else if (arg == "--launch")
                 {
-                    // 捷徑啟動模式：靜默檢查並啟動 Discord
                     silent = true;
                 }
                 else if (arg == "--openasar")
@@ -292,21 +298,33 @@ namespace VencordFix
             NotifyIcon trayIcon = new NotifyIcon();
             trayIcon.Text = "VencordFix 守護中";
             
-            var discords = DiscordApp.DetectInstalledDiscords();
-            if (discords.Count > 0 && File.Exists(Path.Combine(discords[0].RootPath, "app.ico")))
+            string localIco = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets", "app.ico");
+            if (File.Exists(localIco))
             {
                 try
                 {
-                    trayIcon.Icon = new Icon(Path.Combine(discords[0].RootPath, "app.ico"));
+                    trayIcon.Icon = new Icon(localIco);
                 }
-                catch
-                {
-                    trayIcon.Icon = SystemIcons.Application;
-                }
+                catch { }
             }
             else
             {
-                trayIcon.Icon = SystemIcons.Application;
+                var discords = DiscordApp.DetectInstalledDiscords();
+                if (discords.Count > 0 && File.Exists(Path.Combine(discords[0].RootPath, "app.ico")))
+                {
+                    try
+                    {
+                        trayIcon.Icon = new Icon(Path.Combine(discords[0].RootPath, "app.ico"));
+                    }
+                    catch
+                    {
+                        trayIcon.Icon = SystemIcons.Application;
+                    }
+                }
+                else
+                {
+                    trayIcon.Icon = SystemIcons.Application;
+                }
             }
 
             ContextMenu contextMenu = new ContextMenu();

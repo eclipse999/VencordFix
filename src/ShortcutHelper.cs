@@ -54,14 +54,15 @@ namespace VencordFix
                 }
                 else
                 {
-                    var discords = DiscordApp.DetectInstalledDiscords();
-                    if (discords.Count > 0)
+                    // 優先使用 VencordFix.exe 內嵌的專屬圖示
+                    string localIco = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets", "app.ico");
+                    if (File.Exists(localIco))
                     {
-                        string discIco = Path.Combine(discords[0].RootPath, "app.ico");
-                        if (File.Exists(discIco))
-                        {
-                            shortcut.IconLocation = discIco + ",0";
-                        }
+                        shortcut.IconLocation = localIco + ",0";
+                    }
+                    else
+                    {
+                        shortcut.IconLocation = exePath + ",0";
                     }
                 }
 
