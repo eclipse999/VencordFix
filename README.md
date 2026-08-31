@@ -2,196 +2,200 @@
 
 # ⚡ VencordFix (Windows)
 
-**專為 Windows 使用者設計的 Discord Vencord 自動修補與智慧啟動器**  
-*再也不用手動重新安裝 Vencord！Discord 更新後自動無痕修補並啟動。*
+**Automated Discord Patcher, Updater, and Smart Launcher for Vencord on Windows**  
+*Never manually reinstall Vencord again! Automatically detects updates, patches Discord silently, and cleans up temporary files.*
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-blue?logo=windows)](https://github.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Discord Branch](https://img.shields.io/badge/Discord-Stable%20%7C%20PTB%20%7C%20Canary%20%7C%20Dev-5865F2?logo=discord&logoColor=white)](https://discord.com)
 [![Vencord](https://img.shields.io/badge/Mod-Vencord-informational)](https://vencord.dev)
 
-[English](README_EN.md) | **繁體中文**
+**English** | [繁體中文](README.zh-TW.md)
 
 </div>
 
 ---
 
-## 📑 目錄 (Table of Contents)
+## 📑 Table of Contents
 
-- [背景痛點與解決方案](#-背景痛點與解決方案)
-- [核心功能特色](#-核心功能特色)
-- [運作流程圖](#-運作流程圖)
-- [專案結構](#-專案結構)
-- [快速開始指南 (推薦使用方式)](#-快速開始指南-推薦使用方式)
-- [完整命令列參數](#️-完整命令列參數)
-- [防毒軟體安全與誤報說明](#-防毒軟體安全與誤報說明)
-- [自行編譯 (Build from Source)](#️-自行編譯-build-from-source)
-- [免責聲明 (Disclaimer)](#-免責聲明-disclaimer)
-- [開源授權 (License)](#-開源授權-license)
-
----
-
-## 💡 背景痛點與解決方案
-
-每當 Discord 自動在後台發布更新時，原本被 Vencord 修補的 `app.asar` 會被 Discord 官方乾淨版本覆蓋，導致 Vencord 插件失效，使用者往往必須手動去官網下載安裝程式並重新點擊安裝，非常繁瑣。
-
-**VencordFix** 徹底解決了這個問題：
-- **平日啟動**：毫秒級直接啟動 Discord（耗時 < 10ms），無網路延遲。
-- **更新後啟動**：自動偵測到未修補狀態，自動自 GitHub 官方下載最新 `VencordInstallerCli.exe`、完成修補、刪除暫存檔並開啟 Discord。
-- **背景守護**：亦可作為開機背景守護程式，在 Discord 更新寫入硬碟的瞬間即時自動修補。
+- [Problem & Solution](#-problem--solution)
+- [Key Features](#-key-features)
+- [How It Works](#-how-it-works)
+- [Repository Structure](#-repository-structure)
+- [Quick Start Guide (Recommended)](#-quick-start-guide-recommended)
+- [Command-Line Arguments](#️-command-line-arguments)
+- [Antivirus & False Positive Notice](#-antivirus--false-positive-notice)
+- [Build from Source](#️-build-from-source)
+- [Disclaimer](#-disclaimer)
+- [License](#-license)
 
 ---
 
-## ✨ 核心功能特色
+## 💡 Problem & Solution
 
-- ⚡ **毫秒級智慧判斷**：精準讀取 `app-*` 版本目錄與 `resources\_app.asar` 結構，修補狀態下一秒直接拉起 Discord。
-- 📦 **官方來源自動下載**：自動自 [Vencord 官方發行庫](https://github.com/Vencord/Installer) 獲取最新修補檔。
-- 🧹 **100% 無痕暫存清理**：修補完成或中途報錯時，`finally` 機制保證立即刪除下載的安裝檔。
-- 🚀 **完整支援各 Discord 版本**：自動支援 `Discord (Stable)`、`Discord PTB`、`Discord Canary`、`Discord Development`。
-- 🛡️ **防毒啟發式安全設計**：使用專屬隔離暫存目錄 `%LocalAppData%\VencordFix\temp\`，降低 Dropper 誤判。
-- 💎 **零外部依賴**：內建提供已編譯完成的獨立執行檔 `VencordFix.exe`（約 300KB，內嵌圖示），以及開源 PowerShell 腳本。
+Whenever Discord updates itself in the background on Windows, its Squirrel updater creates a fresh `app-<version>` directory and overwrites the patched `app.asar`. This breaks Vencord, requiring users to manually download the installer and reinstall it repeatedly.
+
+**VencordFix** solves this pain point completely:
+- **Instant Launch When Patched**: Checks the patch state in milliseconds (< 10ms) and immediately launches Discord without internet delays.
+- **Auto-Patch When Discord Updates**: When an unpatched version is detected, it automatically downloads the latest official `VencordInstallerCli.exe` from GitHub, safely applies the patch, cleans up the downloaded executable, and launches Discord.
+- **Background Update Watcher**: Can run as a silent background watcher or system tray application to patch Discord the instant Discord downloads a new version.
 
 ---
 
-## 🔄 運作流程圖
+## ✨ Key Features
+
+- ⚡ **Lightning Fast Verification**: Instantly inspects Discord's `app-*` version directory and `resources\_app.asar` state.
+- 📦 **Official Releases**: Downloads the latest installer directly from the [official Vencord/Installer repository](https://github.com/Vencord/Installer).
+- 🧹 **100% Zero-Trace Cleanup**: Guaranteed cleanup via `finally` blocks—downloaded installer files are immediately deleted after execution.
+- 🚀 **Full Discord Edition Support**: Automatically recognizes and supports:
+  - Discord (Stable)
+  - Discord PTB
+  - Discord Canary
+  - Discord Development
+- 🛡️ **Antivirus-Friendly Design**: Uses a dedicated AppData temp folder (`%LocalAppData%\VencordFix\temp\`) instead of the system root `%TEMP%` to avoid heuristic dropper warnings. Includes standard assembly metadata.
+- 💎 **Zero External Dependencies**: Ships with a pre-compiled standalone binary `bin\VencordFix.exe` (~300KB with embedded icon) and an open-source PowerShell script.
+
+---
+
+## 🔄 How It Works
 
 ```mermaid
 graph TD
-    A[點擊啟動 Discord 捷徑 / 執行 VencordFix] --> B{檢查本機 Discord 最新版本}
-    B -->|已修補 Vencord| C[直接秒速啟動 Discord]
-    B -->|尚未修補 / 剛自動更新| D[關閉運作中的 Discord 程序]
-    D --> E[自 GitHub 下載最新 VencordInstallerCli.exe]
-    E --> F[執行自動修補 -install]
-    F --> G[刪除下載的暫存安裝檔]
-    G --> H[啟動 Discord 並載入 Vencord]
+    A[Click Discord Shortcut / Run VencordFix] --> B{Check Latest Discord Version}
+    B -->|Already Patched| C[Launch Discord Instantly < 10ms]
+    B -->|Unpatched / Updated| D[Close Running Discord Processes]
+    D --> E[Download latest VencordInstallerCli.exe from GitHub]
+    E --> F[Run -install command]
+    F --> G[Delete Temporary Installer File]
+    G --> H[Launch Discord with Vencord Active]
 ```
 
 ---
 
-## 📁 專案結構
+## 📁 Repository Structure
 
 ```text
 vencord-fix/
 │
 ├── bin/
-│   └── VencordFix.exe                  # 原生獨立執行檔 (免安裝、極速啟動)
+│   └── VencordFix.exe                  # Standalone Windows executable (Fast, no setup needed)
 │
-├── src/                                # C# 原生程式碼 (使用 Windows 內建 csc 編譯)
-│   ├── Program.cs                      # 程式進入點、參數解析與托盤介面
-│   ├── DiscordApp.cs                   # Discord 安裝偵測、版本排序與啟動
-│   ├── VencordInstaller.cs             # 下載、修補、清理暫存邏輯
-│   ├── WatcherService.cs               # FileSystemWatcher 即時背景更新監聽
-│   ├── ShortcutHelper.cs               # 桌面捷徑與開機啟動管理
-│   └── AssemblyInfo.cs                 # 組件版本與中繼資料 (防誤判優化)
+├── src/                                # C# source code (Compiles with native Windows csc.exe)
+│   ├── Program.cs                      # Entry point, CLI argument parsing, and Tray icon
+│   ├── DiscordApp.cs                   # Detection, version sorting, and process launch
+│   ├── VencordInstaller.cs             # Download, patching, and cleanup logic
+│   ├── WatcherService.cs               # FileSystemWatcher for real-time update detection
+│   ├── ShortcutHelper.cs               # Desktop shortcut and Windows startup management
+│   └── AssemblyInfo.cs                 # Assembly metadata for AV heuristic safety
 │
-├── scripts/                            # 輔助一鍵工具
-│   ├── Install-Shortcut.bat            # 一鍵在桌面建立 Discord [VencordFix] 捷徑
-│   ├── Install-Startup-Watcher.bat     # 一鍵將背景監控加入開機自動啟動
-│   ├── Uninstall-Startup-Watcher.bat   # 一鍵移除開機自動監控設定
-│   └── Test-Cleanup-Verification.ps1   # 暫存檔自動無痕清理驗證腳本
+├── scripts/                            # One-click helper scripts
+│   ├── Install-Shortcut.bat            # Creates Desktop shortcut for Discord [VencordFix]
+│   ├── Install-Startup-Watcher.bat     # Adds background watcher to Windows startup
+│   ├── Uninstall-Startup-Watcher.bat   # Removes Windows startup watcher
+│   └── Test-Cleanup-Verification.ps1   # Verification test script for temp file cleanup
 │
-├── VencordFix.ps1                      # 核心 PowerShell 自動化腳本
-├── Run.bat                             # 一鍵雙擊執行修補與啟動
-├── build.bat / build.ps1               # 一鍵編譯 C# 為 exe
-├── LICENSE                             # MIT 開源授權條款
-├── README.md                           # 中文說明手冊
-└── README_EN.md                        # 英文說明手冊
+├── VencordFix.ps1                      # Core PowerShell automation script
+├── Run.bat                             # Double-clickable runner
+├── build.bat / build.ps1               # Compiles C# source into bin\VencordFix.exe
+├── LICENSE                             # MIT Open Source License
+├── README.md                           # English Documentation (Default)
+└── README.zh-TW.md                     # Traditional Chinese Documentation
 ```
 
 ---
 
-## 🚀 快速開始指南 (推薦使用方式)
+## 🚀 Quick Start Guide (Recommended)
 
-### 方式一：取代桌面 Discord 捷徑（最推薦、最簡單 🌟）
+### Option 1: Replace Desktop Discord Shortcut (Easiest & Recommended 🌟)
 
-1. 雙擊執行 [`scripts\Install-Shortcut.bat`](scripts/Install-Shortcut.bat)。
-2. 您的桌面上會產生一個 **`Discord (VencordFix)`** 捷徑。
-3. **日常直接使用此捷徑開啟 Discord**：
-   - 平日：直接秒速開啟 Discord。
-   - Discord 更新後：點擊會自動在背景修補並開啟 Discord，您完全不需要做任何手動重新安裝！
-
----
-
-### 方式二：設定開機後台自動監控（完全無感）
-
-如果您希望 Discord 在背景默默更新時就被自動修補：
-1. 雙擊執行 [`scripts\Install-Startup-Watcher.bat`](scripts/Install-Startup-Watcher.bat)。
-2. 程式會在 Windows 開機時於背景靜默監控 Discord 目錄，一旦 Discord 下載新版本，程式會即時在背景完成 Vencord 修補。
-
-> 若日後想取消開機啟動，只需執行 [`scripts\Uninstall-Startup-Watcher.bat`](scripts/Uninstall-Startup-Watcher.bat)。
+1. Double-click [`scripts\Install-Shortcut.bat`](scripts/Install-Shortcut.bat).
+2. A shortcut named **`Discord (VencordFix)`** will be created on your Desktop.
+3. **Use this shortcut to launch Discord**:
+   - Normally: Opens Discord instantly.
+   - After a Discord update: Automatically patches Vencord in the background and opens Discord. You never have to reinstall manually!
 
 ---
 
-### 方式三：手動與進階執行
+### Option 2: Run Background Watcher on Startup (Fully Hands-Free)
 
-- **雙擊執行**：直接點擊 `Run.bat` 或 `bin\VencordFix.exe`。
-- **命令列範例**：
+If you want Discord to be automatically patched the moment it downloads an update in the background:
+1. Double-click [`scripts\Install-Startup-Watcher.bat`](scripts/Install-Startup-Watcher.bat).
+2. The watcher will silently monitor Discord directories on Windows startup and patch any newly downloaded versions automatically.
+
+> To disable startup monitoring later, simply run [`scripts\Uninstall-Startup-Watcher.bat`](scripts/Uninstall-Startup-Watcher.bat).
+
+---
+
+### Option 3: Manual & Command-Line Usage
+
+- **Direct Launch**: Double-click `Run.bat` or `bin\VencordFix.exe`.
+- **Command Line Examples**:
   ```cmd
-  # 一般啟動 (自動檢查修補並啟動 Discord)
+  # Standard launch (Check, auto-patch if needed, then launch Discord)
   bin\VencordFix.exe
 
-  # 強制重新修補 Vencord (即使目前已修補)
+  # Force re-download and re-patch Vencord
   bin\VencordFix.exe --force
 
-  # 啟動系統托盤守護模式 (右下角常駐圖示)
+  # Run in System Tray mode (Tray icon in bottom right corner)
   bin\VencordFix.exe --tray
 
-  # 修補並一併安裝 OpenAsar
+  # Patch and install OpenAsar simultaneously
   bin\VencordFix.exe --openasar
   ```
 
 ---
 
-## ⚙️ 完整命令列參數
+## ⚙️ Command-Line Arguments
 
-| 參數 | 簡寫 | 說明 |
+| Argument | Short | Description |
 | :--- | :--- | :--- |
-| `-b, --branch <branch>` | `-b` | 指定 Discord 分支（`auto`、`stable`、`ptb`、`canary`、`dev`），預設為 `auto` |
-| `-f, --force` | `-f` | 強制重新自 GitHub 下載並修補 Vencord |
-| `--no-launch` | | 僅執行檢查與修補，完成後不自動啟動 Discord |
-| `--openasar` | | 修補時一併安裝 OpenAsar |
-| `-w, --watch` | `-w` | 啟動 Console 背景監控模式 (按 Ctrl+C 結束) |
-| `--tray` | | 啟動 Windows 系統托盤背景守護模式 |
-| `--install-shortcut` | | 在桌面建立快捷方式 |
-| `--install-startup` | | 將背景監控寫入 Windows 開機自動啟動 (HKCU Run) |
-| `--uninstall-startup` | | 移除開機自動啟動項目 |
-| `-s, --silent` | `-s` | 靜默模式（隱藏終端機輸出） |
-| `-h, --help` | `-h` | 顯示參數說明畫面 |
+| `-b, --branch <branch>` | `-b` | Discord branch (`auto`, `stable`, `ptb`, `canary`, `dev`). Default: `auto` |
+| `-f, --force` | `-f` | Force re-downloading and re-patching Vencord |
+| `--no-launch` | | Check and patch only; do not start Discord afterwards |
+| `--openasar` | | Install OpenAsar along with Vencord |
+| `-w, --watch` | `-w` | Run real-time console watcher mode (Press Ctrl+C to stop) |
+| `--tray` | | Run in Windows System Tray background mode |
+| `--install-shortcut` | | Create Desktop shortcut |
+| `--install-startup` | | Register background watcher in Windows Startup (HKCU Run) |
+| `--uninstall-startup` | | Remove Windows Startup entry |
+| `-s, --silent` | `-s` | Silent mode (suppress console output) |
+| `-h, --help` | `-h` | Display help screen |
 
 ---
 
-## 🛡️ 防毒軟體安全與誤報說明
+## 🛡️ Antivirus & False Positive Notice
 
-由於本工具涉及「從網路下載安裝檔」與「修補第三方軟體檔案 (`app.asar`)」之行為，部分防毒軟體（如 Kaspersky、Windows Defender）可能會觸發啟發式分析（Heuristic）警報。
+Because this tool modifies third-party application files (`Discord\resources\app.asar`) and downloads an executable from GitHub, some antivirus engines (such as Kaspersky, Windows Defender, Bitdefender) might trigger heuristic flags (`HEUR:Trojan-Downloader` or `Generic.Hook`).
 
-本專案完全開源透明，無任何惡意代碼，並已採取以下安全防護：
-1. **專屬目錄隔離**：下載檔案存放於 `%LocalAppData%\VencordFix\temp\`，絕不污染系統 `%TEMP%`。
-2. **完整中繼資料**：包含完整的組件名稱、版本號與簽名中繼資訊。
-3. **無加殼純淨編譯**：使用 Windows 原生 `csc.exe` 編譯，無任何混淆加殼。
+This project is **100% open-source, safe, and transparent**:
+1. **Isolated Temp Path**: Downloads to `%LocalAppData%\VencordFix\temp\` instead of the system root `%TEMP%`.
+2. **Proper Assembly Metadata**: Built with full assembly information, product name, and versioning.
+3. **Clean Native Build**: Built using Windows built-in `csc.exe` with no packers, obfuscators, or encryptions.
 
-> **提示**：若防毒軟體跳出提示，建議將專案目錄加入防毒軟體排除名單（白名單），或直接使用純文字開源的 [`VencordFix.ps1`](VencordFix.ps1) 運行。
+> **Recommendation**: If your antivirus prompts a warning, add the project folder to your antivirus exclusion list, or use the open-source PowerShell script [`VencordFix.ps1`](VencordFix.ps1) directly.
 
 ---
 
-## 🛠️ 自行編譯 (Build from Source)
+## 🛠️ Build from Source
 
-本專案使用 Windows 系統內建的 Microsoft .NET Framework C# 編譯器（`csc.exe`），您**無需安裝任何 Visual Studio 或 .NET SDK** 即可編譯：
+This project compiles using the built-in Microsoft .NET Framework C# compiler (`csc.exe`) found on every Windows machine. **No Visual Studio or .NET SDK installation is required**:
 
-雙擊執行 `build.bat` 或在 PowerShell 執行：
+Double-click `build.bat` or run in PowerShell:
 ```powershell
 .\build.ps1
 ```
-編譯後的可執行檔將產生於 `bin\VencordFix.exe`。
+The compiled executable will be output to `bin\VencordFix.exe`.
 
 ---
 
-## ⚖️ 免責聲明 (Disclaimer)
+## ⚖️ Disclaimer
 
-- 本工具非 Discord 或 Vencord 官方出品，僅為社群開發之自動化輔助工具。
-- 修改 Discord 客戶端可能違反 Discord 服務條款 (ToS)，使用者須自行評估並承擔相關風險。
+- This project is an independent community automation tool and is not affiliated with, maintained by, or endorsed by Discord or Vencord.
+- Modifying your Discord client may violate Discord's Terms of Service. Use at your own discretion and risk.
 
 ---
 
-## 📄 開源授權 (License)
+## 📄 License
 
-本專案採用 [MIT License](LICENSE) 開源授權。
+This project is licensed under the [MIT License](LICENSE).
