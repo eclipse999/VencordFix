@@ -1,0 +1,323 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using System.Windows.Forms;
+using System.Drawing;
+
+namespace VencordAutoPatcher
+{
+    static class Program
+    {
+        [STAThread]
+        static void Main(string[] args)
+        {
+            bool force = false;
+            bool noLaunch = false;
+            bool openAsar = false;
+            bool watch = false;
+            bool tray = false;
+            bool installShortcut = false;
+            bool installStartup = false;
+            bool uninstallStartup = false;
+            bool silent = false;
+            string branch = "auto";
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                string arg = args[i].ToLowerInvariant();
+                if (arg == "-h" || arg == "--help" || arg == "/?")
+                {
+                    ShowHelp();
+                    return;
+                }
+                else if (arg == "-f" || arg == "--force")
+                {
+                    force = true;
+                }
+                else if (arg == "--no-launch")
+                {
+                    noLaunch = true;
+                }
+                else if (arg == "--openasar")
+                {
+                    openAsar = true;
+                }
+                else if (arg == "-w" || arg == "--watch")
+                {
+                    watch = true;
+                }
+                else if (arg == "--tray")
+                {
+                    tray = true;
+                }
+                else if (arg == "--install-shortcut")
+                {
+                    installShortcut = true;
+                }
+                else if (arg == "--install-startup")
+                {
+                    installStartup = true;
+                }
+                else if (arg == "--uninstall-startup")
+                {
+                    uninstallStartup = true;
+                }
+                else if (arg == "--silent" || arg == "-s")
+                {
+                    silent = true;
+                }
+                else if ((arg == "-b" || arg == "--branch") && i + 1 < args.Length)
+                {
+                    branch = args[++i].ToLowerInvariant();
+                }
+            }
+
+            if (installShortcut)
+            {
+                ShortcutHelper.CreateDesktopShortcut();
+                return;
+            }
+
+            if (installStartup)
+            {
+                ShortcutHelper.SetStartup(true, true);
+                return;
+            }
+
+            if (uninstallStartup)
+            {
+                ShortcutHelper.SetStartup(false);
+                return;
+            }
+
+            if (tray)
+            {
+                RunTrayApp();
+                return;
+            }
+
+            if (watch)
+            {
+                RunWatcherConsole();
+                return;
+            }
+
+            // 預設模式：智慧檢查修補並啟動 Discord
+            RunLauncher(branch, force, noLaunch, openAsar, silent);
+        }
+
+        static void ShowHelp()
+        {
+            Console.WriteLine("==========================================================");
+            Console.WriteLine("  Vencord Auto Patcher for Windows");
+            Console.WriteLine("  Discord 自動修補與智慧啟動器");
+            Console.WriteLine("==========================================================");
+            Console.WriteLine("用法:");
+            Console.WriteLine("  VencordAutoPatcher.exe [選項]");
+            Console.WriteLine("");
+            Console.WriteLine("選項:");
+            Console.WriteLine("  -b, --branch <branch>     指定 Discord 分支 (auto, stable, ptb, canary, dev)。預設: auto");
+            Console.WriteLine("  -f, --force               強制重新下載並修補 Vencord (即使目前已被修補)");
+            Console.WriteLine("      --no-launch           修補後不自動啟動 Discord");
+            Console.WriteLine("      --openasar            一併安裝 OpenAsar");
+            Console.WriteLine("  -w, --watch               背景監控模式 (監聽 Discord 自動更新並即時修補)");
+            Console.WriteLine("      --tray                以系統托盤常駐模式運行");
+            Console.WriteLine("      --install-shortcut    在桌面建立 Vencord 自動修補啟動捷徑");
+            Console.WriteLine("      --install-startup     將背景更新監控加入開機自動啟動");
+            Console.WriteLine("      --uninstall-startup   移除開機自動啟動");
+            Console.WriteLine("  -s, --silent              靜默執行模式");
+            Console.WriteLine("  -h, --help                顯示說明畫面");
+            Console.WriteLine("==========================================================");
+        }
+
+        static void RunLauncher(string branch, bool force, bool noLaunch, bool openAsar, bool silent)
+        {
+            if (!silent)
+            {
+                Console.WriteLine("=== Vencord Discord 自動修補與啟動器 ===");
+            }
+
+            var discords = DiscordApp.DetectInstalledDiscords();
+            if (discords.Count == 0)
+            {
+                if (!silent)
+                {
+                    Console.WriteLine("[-] 未偵測到本機已安裝的 Discord！請確認 Discord 是否安裝於 %LocalAppData%。");
+                }
+                return;
+            }
+
+            List<DiscordApp> targets = new List<DiscordApp>();
+            if (branch == "auto")
+            {
+                targets.AddRange(discords);
+            }
+            else
+            {
+                foreach (var d in discords)
+                {
+                    if (d.BranchName.Equals(branch, StringComparison.OrdinalIgnoreCase))
+                    {
+                        targets.Add(d);
+                    }
+                }
+            }
+
+            if (targets.Count == 0)
+            {
+                if (!silent)
+                {
+                    Console.WriteLine("[-] 找不到指定的 Discord 分支: " + branch);
+                }
+                return;
+            }
+
+            bool needPatch = false;
+            List<DiscordApp> toPatch = new List<DiscordApp>();
+
+            foreach (var d in targets)
+            {
+                bool isPatched = d.IsPatched();
+                if (!silent)
+                {
+                    Console.WriteLine("[*] 偵測到 " + d.Title + " (版本 " + d.AppVersion + ")");
+                    Console.WriteLine("    修補狀態: " + (isPatched ? "[已修補 Vencord]" : "[尚未修補或剛更新]"));
+                }
+
+                if (!isPatched)
+                {
+                    needPatch = true;
+                    toPatch.Add(d);
+                }
+            }
+
+            if (needPatch || force)
+            {
+                if (force)
+                {
+                    if (!silent) Console.WriteLine("[!] 強制模式：將對目標 Discord 重新執行 Vencord 修補...");
+                    toPatch = targets;
+                }
+                else
+                {
+                    if (!silent) Console.WriteLine("[!] 偵測到 Discord 尚未修補 (可能剛更新)，開始修補...");
+                }
+
+                // 關閉運作中的 Discord 避免檔案佔用
+                foreach (var d in toPatch)
+                {
+                    d.KillProcesses();
+                }
+
+                string patchBranch = (branch == "auto") ? "auto" : targets[0].BranchName;
+                bool ok = VencordInstaller.DownloadAndPatch(patchBranch, openAsar, (msg) => {
+                    if (!silent) Console.WriteLine(msg);
+                });
+
+                if (!ok && !silent)
+                {
+                    Console.WriteLine("[-] 修補失敗，請檢查網路連線。");
+                }
+            }
+            else
+            {
+                if (!silent)
+                {
+                    Console.WriteLine("[+] Discord 已是最新修補狀態，秒速直接啟動！");
+                }
+            }
+
+            if (!noLaunch && targets.Count > 0)
+            {
+                if (!silent) Console.WriteLine("[*] 啟動 " + targets[0].Title + "...");
+                targets[0].Launch();
+            }
+
+            if (!silent)
+            {
+                Console.WriteLine("[+] 完成！");
+            }
+        }
+
+        static void RunWatcherConsole()
+        {
+            Console.WriteLine("=== Vencord Discord 背景更新監控 (Watcher Mode) ===");
+            using (var watcher = new WatcherService((msg) => Console.WriteLine(msg)))
+            {
+                watcher.Start();
+                Console.WriteLine("[*] 按 Ctrl+C 結束監控...");
+                ManualResetEvent quitEvent = new ManualResetEvent(false);
+                Console.CancelKeyPress += (s, e) => {
+                    e.Cancel = true;
+                    quitEvent.Set();
+                };
+                quitEvent.WaitOne();
+            }
+            Console.WriteLine("[*] 監控已停止。");
+        }
+
+        static void RunTrayApp()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            NotifyIcon trayIcon = new NotifyIcon();
+            trayIcon.Text = "Vencord Auto Patcher 守護中";
+            
+            // 嘗試取得 Discord 圖示，若無則使用系統預設
+            var discords = DiscordApp.DetectInstalledDiscords();
+            if (discords.Count > 0 && File.Exists(Path.Combine(discords[0].RootPath, "app.ico")))
+            {
+                try
+                {
+                    trayIcon.Icon = new Icon(Path.Combine(discords[0].RootPath, "app.ico"));
+                }
+                catch
+                {
+                    trayIcon.Icon = SystemIcons.Application;
+                }
+            }
+            else
+            {
+                trayIcon.Icon = SystemIcons.Application;
+            }
+
+            ContextMenu contextMenu = new ContextMenu();
+            contextMenu.MenuItems.Add("修補並啟動 Discord", (s, e) => {
+                RunLauncher("auto", false, false, false, false);
+            });
+            contextMenu.MenuItems.Add("強制重新修補 Vencord", (s, e) => {
+                RunLauncher("auto", true, false, false, false);
+            });
+            contextMenu.MenuItems.Add("-");
+            contextMenu.MenuItems.Add("建立桌面捷徑", (s, e) => {
+                ShortcutHelper.CreateDesktopShortcut();
+                trayIcon.ShowBalloonTip(3000, "Vencord Auto Patcher", "已成功在桌面建立捷徑！", ToolTipIcon.Info);
+            });
+            contextMenu.MenuItems.Add("-");
+            contextMenu.MenuItems.Add("結束 (Exit)", (s, e) => {
+                trayIcon.Visible = false;
+                Application.Exit();
+            });
+
+            trayIcon.ContextMenu = contextMenu;
+            trayIcon.Visible = true;
+
+            var watcher = new WatcherService((msg) => {
+                if (msg.Contains("已成功完成 Vencord 修補"))
+                {
+                    trayIcon.ShowBalloonTip(3000, "Vencord Auto Patcher", "Discord 已自動重新修補 Vencord！", ToolTipIcon.Info);
+                }
+            });
+            watcher.Start();
+
+            trayIcon.ShowBalloonTip(2000, "Vencord Auto Patcher", "Vencord 背景更新監控已在系統托盤中啟動！", ToolTipIcon.Info);
+
+            Application.Run();
+
+            watcher.Dispose();
+            trayIcon.Dispose();
+        }
+    }
+}

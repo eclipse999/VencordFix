@@ -1,0 +1,16 @@
+# Visual Studio & VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Temporary and build files
+*.tmp
+*.log
+*VencordInstallerCli*
+obj/
+
+# OS generated files
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
