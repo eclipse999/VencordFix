@@ -157,7 +157,12 @@ function Invoke-VencordPatch {
         [switch]$IncludeOpenAsar
     )
 
-    $tempInstaller = Join-Path $env:TEMP ("VencordInstallerCli_" + [Guid]::NewGuid().ToString("N") + ".exe")
+    $workDir = Join-Path $env:LOCALAPPDATA "VencordAutoPatcher\temp"
+    if (-not (Test-Path $workDir)) {
+        New-Item -ItemType Directory -Force -Path $workDir | Out-Null
+    }
+
+    $tempInstaller = Join-Path $workDir ("VencordInstallerCli_" + [Guid]::NewGuid().ToString("N") + ".exe")
     Write-Log "正在從官方發行版下載最新 Vencord 安裝檔..." "INFO"
     Write-Log "下載網址: $VencordInstallerUrl" "DEBUG"
 
@@ -177,6 +182,7 @@ function Invoke-VencordPatch {
         $processInfo = New-Object System.Diagnostics.ProcessStartInfo
         $processInfo.FileName = $tempInstaller
         $processInfo.Arguments = ($argsList -join ' ')
+        $processInfo.WorkingDirectory = $workDir
         $processInfo.RedirectStandardInput = $true
         $processInfo.RedirectStandardOutput = $true
         $processInfo.RedirectStandardError = $true

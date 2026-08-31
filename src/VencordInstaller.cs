@@ -27,7 +27,18 @@ namespace VencordAutoPatcher
         {
             Action<string> log = logCallback ?? ((msg) => Console.WriteLine(msg));
 
-            string tempPath = Path.Combine(Path.GetTempPath(), "VencordInstallerCli_" + Guid.NewGuid().ToString("N") + ".exe");
+            // 使用專屬應用目錄而非根目錄 %TEMP%，大幅降低防毒軟體的 Dropper/Downloader 誤判
+            string workingDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "VencordAutoPatcher", "temp");
+            try
+            {
+                if (!Directory.Exists(workingDir))
+                {
+                    Directory.CreateDirectory(workingDir);
+                }
+            }
+            catch { }
+
+            string tempPath = Path.Combine(workingDir, "VencordInstallerCli_" + Guid.NewGuid().ToString("N") + ".exe");
             log("[*] 正在從官方發行版下載最新 Vencord 安裝檔...");
             log("    下載來源: " + DefaultInstallerUrl);
 
@@ -52,6 +63,7 @@ namespace VencordAutoPatcher
                 ProcessStartInfo psi = new ProcessStartInfo();
                 psi.FileName = tempPath;
                 psi.Arguments = args;
+                psi.WorkingDirectory = workingDir;
                 psi.UseShellExecute = false;
                 psi.RedirectStandardInput = true;
                 psi.RedirectStandardOutput = true;
