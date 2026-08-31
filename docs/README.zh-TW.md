@@ -6,11 +6,11 @@
 *再也不用手動重新安裝 Vencord！Discord 更新後自動無痕修補並啟動。*
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-blue?logo=windows)](https://github.com/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
 [![Discord Branch](https://img.shields.io/badge/Discord-Stable%20%7C%20PTB%20%7C%20Canary%20%7C%20Dev-5865F2?logo=discord&logoColor=white)](https://discord.com)
 [![Vencord](https://img.shields.io/badge/Mod-Vencord-informational)](https://vencord.dev)
 
-[English](README.md) | **繁體中文**
+[English](../README.md) | **繁體中文**
 
 </div>
 
@@ -76,6 +76,9 @@ vencord-fix/
 ├── bin/
 │   └── VencordFix.exe                  # 原生獨立執行檔 (免安裝、極速啟動)
 │
+├── docs/                               # 說明文件庫
+│   └── README.zh-TW.md                 # 繁體中文說明手冊
+│
 ├── src/                                # C# 原生程式碼 (使用 Windows 內建 csc 編譯)
 │   ├── Program.cs                      # 程式進入點、參數解析與托盤介面
 │   ├── DiscordApp.cs                   # Discord 安裝偵測、版本排序與啟動
@@ -94,8 +97,7 @@ vencord-fix/
 ├── Run.bat                             # 一鍵雙擊執行修補與啟動
 ├── build.bat / build.ps1               # 一鍵編譯 C# 為 exe
 ├── LICENSE                             # MIT 開源授權條款
-├── README.md                           # 英文主說明手冊 (預設)
-└── README.zh-TW.md                     # 繁體中文說明手冊
+└── README.md                           # 英文主說明手冊 (預設首頁)
 ```
 
 ---
@@ -104,7 +106,7 @@ vencord-fix/
 
 ### 方式一：取代桌面 Discord 捷徑（最推薦、最簡單 🌟）
 
-1. 雙擊執行 [`scripts\Install-Shortcut.bat`](scripts/Install-Shortcut.bat)。
+1. 雙擊執行 [`scripts\Install-Shortcut.bat`](../scripts/Install-Shortcut.bat)。
 2. 您的桌面上會產生一個 **`Discord (VencordFix)`** 捷徑。
 3. **日常直接使用此捷徑開啟 Discord**：
    - 平日：直接秒速開啟 Discord。
@@ -115,10 +117,10 @@ vencord-fix/
 ### 方式二：設定開機後台自動監控（完全無感）
 
 如果您希望 Discord 在背景默默更新時就被自動修補：
-1. 雙擊執行 [`scripts\Install-Startup-Watcher.bat`](scripts/Install-Startup-Watcher.bat)。
+1. 雙擊執行 [`scripts\Install-Startup-Watcher.bat`](../scripts/Install-Startup-Watcher.bat)。
 2. 程式會在 Windows 開機時於背景靜默監控 Discord 目錄，一旦 Discord 下載新版本，程式會即時在背景完成 Vencord 修補。
 
-> 若日後想取消開機啟動，只需執行 [`scripts\Uninstall-Startup-Watcher.bat`](scripts/Uninstall-Startup-Watcher.bat)。
+> 若日後想取消開機啟動，只需執行 [`scripts\Uninstall-Startup-Watcher.bat`](../scripts/Uninstall-Startup-Watcher.bat)。
 
 ---
 
@@ -169,7 +171,7 @@ vencord-fix/
 2. **完整中繼資料**：包含完整的組件名稱、版本號與簽名中繼資訊。
 3. **無加殼純淨編譯**：使用 Windows 原生 `csc.exe` 編譯，無任何混淆加殼。
 
-> **提示**：若防毒軟體跳出提示，建議將專案目錄加入防毒軟體排除名單（白名單），或直接使用純文字開源的 [`VencordFix.ps1`](VencordFix.ps1) 運行。
+> **提示**：若防毒軟體跳出提示，建議將專案目錄加入防毒軟體排除名單（白名單），或直接使用純文字開源的 [`VencordFix.ps1`](../VencordFix.ps1) 運行。
 
 ---
 
@@ -194,4 +196,4 @@ vencord-fix/
 
 ## 📄 開源授權 (License)
 
-本專案採用 [MIT License](LICENSE) 開源授權。
+本專案採用 [MIT License](../LICENSE) 開源授權。

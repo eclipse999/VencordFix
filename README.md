@@ -10,7 +10,7 @@
 [![Discord Branch](https://img.shields.io/badge/Discord-Stable%20%7C%20PTB%20%7C%20Canary%20%7C%20Dev-5865F2?logo=discord&logoColor=white)](https://discord.com)
 [![Vencord](https://img.shields.io/badge/Mod-Vencord-informational)](https://vencord.dev)
 
-**English** | [繁體中文](README.zh-TW.md)
+**English** | [繁體中文](docs/README.zh-TW.md)
 
 </div>
 
@@ -80,6 +80,9 @@ vencord-fix/
 ├── bin/
 │   └── VencordFix.exe                  # Standalone Windows executable (Fast, no setup needed)
 │
+├── docs/                               # Documentation & Translations
+│   └── README.zh-TW.md                 # Traditional Chinese Documentation
+│
 ├── src/                                # C# source code (Compiles with native Windows csc.exe)
 │   ├── Program.cs                      # Entry point, CLI argument parsing, and Tray icon
 │   ├── DiscordApp.cs                   # Detection, version sorting, and process launch
@@ -98,8 +101,7 @@ vencord-fix/
 ├── Run.bat                             # Double-clickable runner
 ├── build.bat / build.ps1               # Compiles C# source into bin\VencordFix.exe
 ├── LICENSE                             # MIT Open Source License
-├── README.md                           # English Documentation (Default)
-└── README.zh-TW.md                     # Traditional Chinese Documentation
+└── README.md                           # English Documentation (Default)
 ```
 
 ---
