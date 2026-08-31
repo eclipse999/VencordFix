@@ -20,6 +20,11 @@
 
 ## ⬇️ [Download VencordFix (Latest Release)](https://github.com/eclipse999/VencordFix/releases/latest)
 
+| Package | Description |
+| :--- | :--- |
+| **`VencordFix.exe`** | Standalone Portable Executable (Recommended, No install needed) |
+| **`VencordFix-Windows.zip`** | Complete Package (Includes standalone executable & helper scripts) |
+
 </div>
 
 ---
