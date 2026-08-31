@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace VencordAutoPatcher
+namespace VencordFix
 {
     public class DiscordApp
     {
@@ -35,9 +35,6 @@ namespace VencordAutoPatcher
             string appAsar = Path.Combine(ResourcesDir, "app.asar");
             string origAppAsar = Path.Combine(ResourcesDir, "_app.asar");
 
-            // 當 Discord 被 Vencord 修補時：
-            // 1. 原始 Discord asar 被重新命名為 _app.asar
-            // 2. 新的 app.asar 是小型的 shim 載入器 (大小通常 < 200KB)
             if (File.Exists(origAppAsar) && File.Exists(appAsar))
             {
                 try

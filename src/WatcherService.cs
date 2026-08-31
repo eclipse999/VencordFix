@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
-namespace VencordAutoPatcher
+namespace VencordFix
 {
     public class WatcherService : IDisposable
     {
@@ -54,7 +54,6 @@ namespace VencordAutoPatcher
             string name = e.Name ?? "";
             string fullPath = e.FullPath ?? "";
 
-            // 判斷是否為 app- 目錄建立或 app.asar 異動
             bool isRelevant = name.StartsWith("app-", StringComparison.OrdinalIgnoreCase) ||
                               fullPath.IndexOf("resources", StringComparison.OrdinalIgnoreCase) >= 0;
 
@@ -67,7 +66,6 @@ namespace VencordAutoPatcher
                         _debounceTimer.Dispose();
                     }
 
-                    // 防抖動延遲 3 秒，確保 Discord 更新檔案寫入完成
                     _debounceTimer = new Timer(CheckAndPatchTriggered, null, 3000, Timeout.Infinite);
                 }
             }

@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ Vencord Auto Patcher for Windows
+# ⚡ VencordFix (Windows)
 
 **專為 Windows 使用者設計的 Discord Vencord 自動修補與智慧啟動器**  
 *再也不用手動重新安裝 Vencord！Discord 更新後自動無痕修補並啟動。*
@@ -35,7 +35,7 @@
 
 每當 Discord 自動在後台發布更新時，原本被 Vencord 修補的 `app.asar` 會被 Discord 官方乾淨版本覆蓋，導致 Vencord 插件失效，使用者往往必須手動去官網下載安裝程式並重新點擊安裝，非常繁瑣。
 
-**Vencord Auto Patcher** 徹底解決了這個問題：
+**VencordFix** 徹底解決了這個問題：
 - **平日啟動**：毫秒級直接啟動 Discord（耗時 < 10ms），無網路延遲。
 - **更新後啟動**：自動偵測到未修補狀態，自動自 GitHub 官方下載最新 `VencordInstallerCli.exe`、完成修補、刪除暫存檔並開啟 Discord。
 - **背景守護**：亦可作為開機背景守護程式，在 Discord 更新寫入硬碟的瞬間即時自動修補。
@@ -48,8 +48,8 @@
 - 📦 **官方來源自動下載**：自動自 [Vencord 官方發行庫](https://github.com/Vencord/Installer) 獲取最新修補檔。
 - 🧹 **100% 無痕暫存清理**：修補完成或中途報錯時，`finally` 機制保證立即刪除下載的安裝檔。
 - 🚀 **完整支援各 Discord 版本**：自動支援 `Discord (Stable)`、`Discord PTB`、`Discord Canary`、`Discord Development`。
-- 🛡️ **防毒啟發式安全設計**：使用專屬隔離暫存目錄 `%LocalAppData%\VencordAutoPatcher\temp\`，降低 Dropper 誤判。
-- 💎 **零外部依賴**：內建提供已編譯完成的獨立執行檔 `VencordAutoPatcher.exe`（約 300KB，內嵌圖示），以及開源 PowerShell 腳本。
+- 🛡️ **防毒啟發式安全設計**：使用專屬隔離暫存目錄 `%LocalAppData%\VencordFix\temp\`，降低 Dropper 誤判。
+- 💎 **零外部依賴**：內建提供已編譯完成的獨立執行檔 `VencordFix.exe`（約 300KB，內嵌圖示），以及開源 PowerShell 腳本。
 
 ---
 
@@ -57,7 +57,7 @@
 
 ```mermaid
 graph TD
-    A[點擊啟動 Discord 捷徑 / 執行 Patcher] --> B{檢查本機 Discord 最新版本}
+    A[點擊啟動 Discord 捷徑 / 執行 VencordFix] --> B{檢查本機 Discord 最新版本}
     B -->|已修補 Vencord| C[直接秒速啟動 Discord]
     B -->|尚未修補 / 剛自動更新| D[關閉運作中的 Discord 程序]
     D --> E[自 GitHub 下載最新 VencordInstallerCli.exe]
@@ -71,10 +71,10 @@ graph TD
 ## 📁 專案結構
 
 ```text
-vencord-autopatcher/
+vencord-fix/
 │
 ├── bin/
-│   └── VencordAutoPatcher.exe          # 原生獨立執行檔 (免安裝、極速啟動)
+│   └── VencordFix.exe                  # 原生獨立執行檔 (免安裝、極速啟動)
 │
 ├── src/                                # C# 原生程式碼 (使用 Windows 內建 csc 編譯)
 │   ├── Program.cs                      # 程式進入點、參數解析與托盤介面
@@ -85,13 +85,13 @@ vencord-autopatcher/
 │   └── AssemblyInfo.cs                 # 組件版本與中繼資料 (防誤判優化)
 │
 ├── scripts/                            # 輔助一鍵工具
-│   ├── Install-Shortcut.bat            # 一鍵在桌面建立 Discord [Vencord] 捷徑
+│   ├── Install-Shortcut.bat            # 一鍵在桌面建立 Discord [VencordFix] 捷徑
 │   ├── Install-Startup-Watcher.bat     # 一鍵將背景監控加入開機自動啟動
 │   ├── Uninstall-Startup-Watcher.bat   # 一鍵移除開機自動監控設定
 │   └── Test-Cleanup-Verification.ps1   # 暫存檔自動無痕清理驗證腳本
 │
-├── VencordAutoPatcher.ps1              # 核心 PowerShell 自動化腳本
-├── Run-Patcher.bat                     # 一鍵雙擊執行修補與啟動
+├── VencordFix.ps1                      # 核心 PowerShell 自動化腳本
+├── Run.bat                             # 一鍵雙擊執行修補與啟動
 ├── build.bat / build.ps1               # 一鍵編譯 C# 為 exe
 ├── LICENSE                             # MIT 開源授權條款
 ├── README.md                           # 中文說明手冊
@@ -105,7 +105,7 @@ vencord-autopatcher/
 ### 方式一：取代桌面 Discord 捷徑（最推薦、最簡單 🌟）
 
 1. 雙擊執行 [`scripts\Install-Shortcut.bat`](scripts/Install-Shortcut.bat)。
-2. 您的桌面上會產生一個 **`Discord (Vencord Auto-Patch)`** 捷徑。
+2. 您的桌面上會產生一個 **`Discord (VencordFix)`** 捷徑。
 3. **日常直接使用此捷徑開啟 Discord**：
    - 平日：直接秒速開啟 Discord。
    - Discord 更新後：點擊會自動在背景修補並開啟 Discord，您完全不需要做任何手動重新安裝！
@@ -124,20 +124,20 @@ vencord-autopatcher/
 
 ### 方式三：手動與進階執行
 
-- **雙擊執行**：直接點擊 `Run-Patcher.bat` 或 `bin\VencordAutoPatcher.exe`。
+- **雙擊執行**：直接點擊 `Run.bat` 或 `bin\VencordFix.exe`。
 - **命令列範例**：
   ```cmd
   # 一般啟動 (自動檢查修補並啟動 Discord)
-  bin\VencordAutoPatcher.exe
+  bin\VencordFix.exe
 
   # 強制重新修補 Vencord (即使目前已修補)
-  bin\VencordAutoPatcher.exe --force
+  bin\VencordFix.exe --force
 
   # 啟動系統托盤守護模式 (右下角常駐圖示)
-  bin\VencordAutoPatcher.exe --tray
+  bin\VencordFix.exe --tray
 
   # 修補並一併安裝 OpenAsar
-  bin\VencordAutoPatcher.exe --openasar
+  bin\VencordFix.exe --openasar
   ```
 
 ---
@@ -165,11 +165,11 @@ vencord-autopatcher/
 由於本工具涉及「從網路下載安裝檔」與「修補第三方軟體檔案 (`app.asar`)」之行為，部分防毒軟體（如 Kaspersky、Windows Defender）可能會觸發啟發式分析（Heuristic）警報。
 
 本專案完全開源透明，無任何惡意代碼，並已採取以下安全防護：
-1. **專屬目錄隔離**：下載檔案存放於 `%LocalAppData%\VencordAutoPatcher\temp\`，絕不污染系統 `%TEMP%`。
+1. **專屬目錄隔離**：下載檔案存放於 `%LocalAppData%\VencordFix\temp\`，絕不污染系統 `%TEMP%`。
 2. **完整中繼資料**：包含完整的組件名稱、版本號與簽名中繼資訊。
 3. **無加殼純淨編譯**：使用 Windows 原生 `csc.exe` 編譯，無任何混淆加殼。
 
-> **提示**：若防毒軟體跳出提示，建議將專案目錄加入防毒軟體排除名單（白名單），或直接使用純文字開源的 [`VencordAutoPatcher.ps1`](VencordAutoPatcher.ps1) 運行。
+> **提示**：若防毒軟體跳出提示，建議將專案目錄加入防毒軟體排除名單（白名單），或直接使用純文字開源的 [`VencordFix.ps1`](VencordFix.ps1) 運行。
 
 ---
 
@@ -181,7 +181,7 @@ vencord-autopatcher/
 ```powershell
 .\build.ps1
 ```
-編譯後的可執行檔將產生於 `bin\VencordAutoPatcher.exe`。
+編譯後的可執行檔將產生於 `bin\VencordFix.exe`。
 
 ---
 

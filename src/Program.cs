@@ -5,7 +5,7 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Drawing;
 
-namespace VencordAutoPatcher
+namespace VencordFix
 {
     static class Program
     {
@@ -103,18 +103,17 @@ namespace VencordAutoPatcher
                 return;
             }
 
-            // 預設模式：智慧檢查修補並啟動 Discord
             RunLauncher(branch, force, noLaunch, openAsar, silent);
         }
 
         static void ShowHelp()
         {
             Console.WriteLine("==========================================================");
-            Console.WriteLine("  Vencord Auto Patcher for Windows");
+            Console.WriteLine("  VencordFix for Windows");
             Console.WriteLine("  Discord 自動修補與智慧啟動器");
             Console.WriteLine("==========================================================");
             Console.WriteLine("用法:");
-            Console.WriteLine("  VencordAutoPatcher.exe [選項]");
+            Console.WriteLine("  VencordFix.exe [選項]");
             Console.WriteLine("");
             Console.WriteLine("選項:");
             Console.WriteLine("  -b, --branch <branch>     指定 Discord 分支 (auto, stable, ptb, canary, dev)。預設: auto");
@@ -123,7 +122,7 @@ namespace VencordAutoPatcher
             Console.WriteLine("      --openasar            一併安裝 OpenAsar");
             Console.WriteLine("  -w, --watch               背景監控模式 (監聽 Discord 自動更新並即時修補)");
             Console.WriteLine("      --tray                以系統托盤常駐模式運行");
-            Console.WriteLine("      --install-shortcut    在桌面建立 Vencord 自動修補啟動捷徑");
+            Console.WriteLine("      --install-shortcut    在桌面建立 VencordFix 啟動捷徑");
             Console.WriteLine("      --install-startup     將背景更新監控加入開機自動啟動");
             Console.WriteLine("      --uninstall-startup   移除開機自動啟動");
             Console.WriteLine("  -s, --silent              靜默執行模式");
@@ -135,7 +134,7 @@ namespace VencordAutoPatcher
         {
             if (!silent)
             {
-                Console.WriteLine("=== Vencord Discord 自動修補與啟動器 ===");
+                Console.WriteLine("=== VencordFix: Discord 自動修補與啟動器 ===");
             }
 
             var discords = DiscordApp.DetectInstalledDiscords();
@@ -204,7 +203,6 @@ namespace VencordAutoPatcher
                     if (!silent) Console.WriteLine("[!] 偵測到 Discord 尚未修補 (可能剛更新)，開始修補...");
                 }
 
-                // 關閉運作中的 Discord 避免檔案佔用
                 foreach (var d in toPatch)
                 {
                     d.KillProcesses();
@@ -242,7 +240,7 @@ namespace VencordAutoPatcher
 
         static void RunWatcherConsole()
         {
-            Console.WriteLine("=== Vencord Discord 背景更新監控 (Watcher Mode) ===");
+            Console.WriteLine("=== VencordFix: Discord 背景更新監控 (Watcher Mode) ===");
             using (var watcher = new WatcherService((msg) => Console.WriteLine(msg)))
             {
                 watcher.Start();
@@ -263,9 +261,8 @@ namespace VencordAutoPatcher
             Application.SetCompatibleTextRenderingDefault(false);
 
             NotifyIcon trayIcon = new NotifyIcon();
-            trayIcon.Text = "Vencord Auto Patcher 守護中";
+            trayIcon.Text = "VencordFix 守護中";
             
-            // 嘗試取得 Discord 圖示，若無則使用系統預設
             var discords = DiscordApp.DetectInstalledDiscords();
             if (discords.Count > 0 && File.Exists(Path.Combine(discords[0].RootPath, "app.ico")))
             {
@@ -293,7 +290,7 @@ namespace VencordAutoPatcher
             contextMenu.MenuItems.Add("-");
             contextMenu.MenuItems.Add("建立桌面捷徑", (s, e) => {
                 ShortcutHelper.CreateDesktopShortcut();
-                trayIcon.ShowBalloonTip(3000, "Vencord Auto Patcher", "已成功在桌面建立捷徑！", ToolTipIcon.Info);
+                trayIcon.ShowBalloonTip(3000, "VencordFix", "已成功在桌面建立捷徑！", ToolTipIcon.Info);
             });
             contextMenu.MenuItems.Add("-");
             contextMenu.MenuItems.Add("結束 (Exit)", (s, e) => {
@@ -307,12 +304,12 @@ namespace VencordAutoPatcher
             var watcher = new WatcherService((msg) => {
                 if (msg.Contains("已成功完成 Vencord 修補"))
                 {
-                    trayIcon.ShowBalloonTip(3000, "Vencord Auto Patcher", "Discord 已自動重新修補 Vencord！", ToolTipIcon.Info);
+                    trayIcon.ShowBalloonTip(3000, "VencordFix", "Discord 已自動重新修補 Vencord！", ToolTipIcon.Info);
                 }
             });
             watcher.Start();
 
-            trayIcon.ShowBalloonTip(2000, "Vencord Auto Patcher", "Vencord 背景更新監控已在系統托盤中啟動！", ToolTipIcon.Info);
+            trayIcon.ShowBalloonTip(2000, "VencordFix", "VencordFix 背景更新監控已在系統托盤中啟動！", ToolTipIcon.Info);
 
             Application.Run();
 

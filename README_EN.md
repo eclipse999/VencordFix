@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ Vencord Auto Patcher for Windows
+# ⚡ VencordFix (Windows)
 
 **Automated Discord Patcher, Updater, and Smart Launcher for Vencord on Windows**  
 *Never manually reinstall Vencord again! Automatically detects updates, patches Discord silently, and cleans up temporary files.*
@@ -35,7 +35,7 @@
 
 Whenever Discord updates itself in the background on Windows, its Squirrel updater creates a fresh `app-<version>` directory and overwrites the patched `app.asar`. This breaks Vencord, requiring users to manually download the installer and reinstall it repeatedly.
 
-**Vencord Auto Patcher** solves this pain point completely:
+**VencordFix** solves this pain point completely:
 - **Instant Launch When Patched**: Checks the patch state in milliseconds (< 10ms) and immediately launches Discord without internet delays.
 - **Auto-Patch When Discord Updates**: When an unpatched version is detected, it automatically downloads the latest official `VencordInstallerCli.exe` from GitHub, safely applies the patch, cleans up the downloaded executable, and launches Discord.
 - **Background Update Watcher**: Can run as a silent background watcher or system tray application to patch Discord the instant Discord downloads a new version.
@@ -52,8 +52,8 @@ Whenever Discord updates itself in the background on Windows, its Squirrel updat
   - Discord PTB
   - Discord Canary
   - Discord Development
-- 🛡️ **Antivirus-Friendly Design**: Uses a dedicated AppData temp folder (`%LocalAppData%\VencordAutoPatcher\temp\`) instead of the system root `%TEMP%` to avoid heuristic dropper warnings. Includes standard assembly metadata.
-- 💎 **Zero External Dependencies**: Ships with a pre-compiled standalone binary `bin\VencordAutoPatcher.exe` (~300KB with embedded icon) and an open-source PowerShell script.
+- 🛡️ **Antivirus-Friendly Design**: Uses a dedicated AppData temp folder (`%LocalAppData%\VencordFix\temp\`) instead of the system root `%TEMP%` to avoid heuristic dropper warnings. Includes standard assembly metadata.
+- 💎 **Zero External Dependencies**: Ships with a pre-compiled standalone binary `bin\VencordFix.exe` (~300KB with embedded icon) and an open-source PowerShell script.
 
 ---
 
@@ -61,7 +61,7 @@ Whenever Discord updates itself in the background on Windows, its Squirrel updat
 
 ```mermaid
 graph TD
-    A[Click Discord Shortcut / Run Patcher] --> B{Check Latest Discord Version}
+    A[Click Discord Shortcut / Run VencordFix] --> B{Check Latest Discord Version}
     B -->|Already Patched| C[Launch Discord Instantly < 10ms]
     B -->|Unpatched / Updated| D[Close Running Discord Processes]
     D --> E[Download latest VencordInstallerCli.exe from GitHub]
@@ -75,10 +75,10 @@ graph TD
 ## 📁 Repository Structure
 
 ```text
-vencord-autopatcher/
+vencord-fix/
 │
 ├── bin/
-│   └── VencordAutoPatcher.exe          # Standalone Windows executable (Fast, no setup needed)
+│   └── VencordFix.exe                  # Standalone Windows executable (Fast, no setup needed)
 │
 ├── src/                                # C# source code (Compiles with native Windows csc.exe)
 │   ├── Program.cs                      # Entry point, CLI argument parsing, and Tray icon
@@ -89,14 +89,14 @@ vencord-autopatcher/
 │   └── AssemblyInfo.cs                 # Assembly metadata for AV heuristic safety
 │
 ├── scripts/                            # One-click helper scripts
-│   ├── Install-Shortcut.bat            # Creates Desktop shortcut for Discord [Vencord]
+│   ├── Install-Shortcut.bat            # Creates Desktop shortcut for Discord [VencordFix]
 │   ├── Install-Startup-Watcher.bat     # Adds background watcher to Windows startup
 │   ├── Uninstall-Startup-Watcher.bat   # Removes Windows startup watcher
 │   └── Test-Cleanup-Verification.ps1   # Verification test script for temp file cleanup
 │
-├── VencordAutoPatcher.ps1              # Core PowerShell automation script
-├── Run-Patcher.bat                     # Double-clickable runner
-├── build.bat / build.ps1               # Compiles C# source into bin\VencordAutoPatcher.exe
+├── VencordFix.ps1                      # Core PowerShell automation script
+├── Run.bat                             # Double-clickable runner
+├── build.bat / build.ps1               # Compiles C# source into bin\VencordFix.exe
 ├── LICENSE                             # MIT Open Source License
 ├── README.md                           # Traditional Chinese Documentation
 └── README_EN.md                        # English Documentation
@@ -109,7 +109,7 @@ vencord-autopatcher/
 ### Option 1: Replace Desktop Discord Shortcut (Easiest & Recommended 🌟)
 
 1. Double-click [`scripts\Install-Shortcut.bat`](scripts/Install-Shortcut.bat).
-2. A shortcut named **`Discord (Vencord Auto-Patch)`** will be created on your Desktop.
+2. A shortcut named **`Discord (VencordFix)`** will be created on your Desktop.
 3. **Use this shortcut to launch Discord**:
    - Normally: Opens Discord instantly.
    - After a Discord update: Automatically patches Vencord in the background and opens Discord. You never have to reinstall manually!
@@ -128,20 +128,20 @@ If you want Discord to be automatically patched the moment it downloads an updat
 
 ### Option 3: Manual & Command-Line Usage
 
-- **Direct Launch**: Double-click `Run-Patcher.bat` or `bin\VencordAutoPatcher.exe`.
+- **Direct Launch**: Double-click `Run.bat` or `bin\VencordFix.exe`.
 - **Command Line Examples**:
   ```cmd
   # Standard launch (Check, auto-patch if needed, then launch Discord)
-  bin\VencordAutoPatcher.exe
+  bin\VencordFix.exe
 
   # Force re-download and re-patch Vencord
-  bin\VencordAutoPatcher.exe --force
+  bin\VencordFix.exe --force
 
   # Run in System Tray mode (Tray icon in bottom right corner)
-  bin\VencordAutoPatcher.exe --tray
+  bin\VencordFix.exe --tray
 
   # Patch and install OpenAsar simultaneously
-  bin\VencordAutoPatcher.exe --openasar
+  bin\VencordFix.exe --openasar
   ```
 
 ---
@@ -169,11 +169,11 @@ If you want Discord to be automatically patched the moment it downloads an updat
 Because this tool modifies third-party application files (`Discord\resources\app.asar`) and downloads an executable from GitHub, some antivirus engines (such as Kaspersky, Windows Defender, Bitdefender) might trigger heuristic flags (`HEUR:Trojan-Downloader` or `Generic.Hook`).
 
 This project is **100% open-source, safe, and transparent**:
-1. **Isolated Temp Path**: Downloads to `%LocalAppData%\VencordAutoPatcher\temp\` instead of the system root `%TEMP%`.
+1. **Isolated Temp Path**: Downloads to `%LocalAppData%\VencordFix\temp\` instead of the system root `%TEMP%`.
 2. **Proper Assembly Metadata**: Built with full assembly information, product name, and versioning.
 3. **Clean Native Build**: Built using Windows built-in `csc.exe` with no packers, obfuscators, or encryptions.
 
-> **Recommendation**: If your antivirus prompts a warning, add `c:\mycode\vencord-autopatcher` to your antivirus exclusion list, or use the open-source PowerShell script [`VencordAutoPatcher.ps1`](VencordAutoPatcher.ps1) directly.
+> **Recommendation**: If your antivirus prompts a warning, add the project folder to your antivirus exclusion list, or use the open-source PowerShell script [`VencordFix.ps1`](VencordFix.ps1) directly.
 
 ---
 
@@ -185,7 +185,7 @@ Double-click `build.bat` or run in PowerShell:
 ```powershell
 .\build.ps1
 ```
-The compiled executable will be output to `bin\VencordAutoPatcher.exe`.
+The compiled executable will be output to `bin\VencordFix.exe`.
 
 ---
 

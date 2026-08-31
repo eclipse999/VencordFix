@@ -3,11 +3,11 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
 
-namespace VencordAutoPatcher
+namespace VencordFix
 {
     public static class ShortcutHelper
     {
-        public const string StartupKeyName = "VencordAutoPatcherWatcher";
+        public const string StartupKeyName = "VencordFixWatcher";
 
         public static bool CreateDesktopShortcut(string iconPath = null)
         {
@@ -15,9 +15,8 @@ namespace VencordAutoPatcher
             {
                 string exePath = ProcessPath();
                 string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-                string shortcutLocation = Path.Combine(desktopPath, "Discord (Vencord Auto-Patch).lnk");
+                string shortcutLocation = Path.Combine(desktopPath, "Discord (VencordFix).lnk");
 
-                // 使用 late-binding 呼叫 WScript.Shell 建立捷徑，無需依賴 Interop DLL
                 Type shellType = Type.GetTypeFromProgID("WScript.Shell");
                 if (shellType == null)
                 {
@@ -37,7 +36,6 @@ namespace VencordAutoPatcher
                 }
                 else
                 {
-                    // 尋找已安裝 Discord 的 app.ico
                     var discords = DiscordApp.DetectInstalledDiscords();
                     if (discords.Count > 0)
                     {
@@ -77,12 +75,12 @@ namespace VencordAutoPatcher
                         string exePath = ProcessPath();
                         string cmd = "\"" + exePath + "\" " + (watchMode ? "--watch --silent" : "--silent");
                         key.SetValue(StartupKeyName, cmd);
-                        Console.WriteLine("[+] 已成功將 Vencord 背景監控加入開機自動啟動 (HKCU Run)");
+                        Console.WriteLine("[+] 已成功將 VencordFix 背景監控加入開機自動啟動 (HKCU Run)");
                     }
                     else
                     {
                         key.DeleteValue(StartupKeyName, false);
-                        Console.WriteLine("[+] 已移除 Vencord 開機自動啟動設定");
+                        Console.WriteLine("[+] 已移除 VencordFix 開機自動啟動設定");
                     }
                     return true;
                 }

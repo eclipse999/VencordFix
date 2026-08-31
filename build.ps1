@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    編譯 VencordAutoPatcher.exe
+    編譯 VencordFix.exe
 #>
 
 $cscPath = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
@@ -18,7 +18,7 @@ if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir | Out-Null
 }
 
-$outputExe = Join-Path $outputDir "VencordAutoPatcher.exe"
+$outputExe = Join-Path $outputDir "VencordFix.exe"
 $srcFiles = (Get-ChildItem -Path (Join-Path $PSScriptRoot "src") -Filter "*.cs").FullName
 
 # 嘗試尋找 Discord 的 app.ico
@@ -41,7 +41,7 @@ $srcArgs = ($srcFiles | ForEach-Object { "`"$_`"" }) -join " "
 
 $cmd = "& `"$cscPath`" /target:exe /optimize+ /nologo /out:`"$outputExe`" $iconOption $rArgs $srcArgs"
 
-Write-Host "正在編譯 VencordAutoPatcher.exe..." -ForegroundColor Cyan
+Write-Host "正在編譯 VencordFix.exe..." -ForegroundColor Cyan
 Invoke-Expression $cmd
 
 if ($LASTEXITCODE -eq 0 -and (Test-Path $outputExe)) {

@@ -2,10 +2,10 @@
 setlocal
 cd /d "%~dp0.."
 
-if exist "bin\VencordAutoPatcher.exe" (
-    "bin\VencordAutoPatcher.exe" --install-startup
+if exist "bin\VencordFix.exe" (
+    "bin\VencordFix.exe" --install-startup
 ) else (
-    powershell -ExecutionPolicy Bypass -File "VencordAutoPatcher.ps1" -InstallStartup
+    powershell -ExecutionPolicy Bypass -File "VencordFix.ps1" -InstallStartup
 )
 
 echo.

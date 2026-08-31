@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Vencord Auto Patcher for Discord on Windows
+    VencordFix - Discord Auto Patcher & Smart Launcher for Windows
 .DESCRIPTION
     自動檢測 Discord 更新狀態，並在需要時從官方 GitHub 下載 Vencord 安裝檔執行修補，
     修補完成後自動刪除安裝檔並啟動 Discord。
@@ -15,7 +15,7 @@
 .PARAMETER Watch
     以背景監控模式執行，即時偵測 Discord 自動更新並自動修補
 .PARAMETER InstallShortcut
-    在桌面建立 Vencord 自動修補啟動捷徑
+    在桌面建立 VencordFix 啟動捷徑
 .PARAMETER InstallStartup
     將背景監控程式加入 Windows 開機自動啟動
 .PARAMETER UninstallStartup
@@ -74,7 +74,6 @@ function Get-InstalledDiscords {
     foreach ($b in $DiscordBranches) {
         $branchPath = Join-Path $localAppData $b.Folder
         if (Test-Path $branchPath) {
-            # 尋找所有 app-* 目錄，依版本號或修改時間排序取得最新版
             $appDirs = Get-ChildItem -Path $branchPath -Directory -Filter "app-*" |
                 Sort-Object {
                     try {
@@ -114,13 +113,10 @@ function Test-IsDiscordPatched {
     $appAsar = Join-Path $resourcesDir "app.asar"
     $origAppAsar = Join-Path $resourcesDir "_app.asar"
 
-    # Vencord 修補特徵：
-    # 1. 存在備份的原始檔案 _app.asar
-    # 2. app.asar 存在且通常很小（< 200KB），內含 Vencord 載入器或 patcher.js 引用
     if (Test-Path $origAppAsar) {
         if (Test-Path $appAsar) {
             $asarItem = Get-Item $appAsar
-            if ($asarItem.Length -lt 200000) { # Vencord 的 loader 只有幾百 bytes
+            if ($asarItem.Length -lt 200000) {
                 return $true
             }
         }
@@ -157,7 +153,7 @@ function Invoke-VencordPatch {
         [switch]$IncludeOpenAsar
     )
 
-    $workDir = Join-Path $env:LOCALAPPDATA "VencordAutoPatcher\temp"
+    $workDir = Join-Path $env:LOCALAPPDATA "VencordFix\temp"
     if (-not (Test-Path $workDir)) {
         New-Item -ItemType Directory -Force -Path $workDir | Out-Null
     }
@@ -167,11 +163,9 @@ function Invoke-VencordPatch {
     Write-Log "下載網址: $VencordInstallerUrl" "DEBUG"
 
     try {
-        # 下載最新安裝檔
         Invoke-WebRequest -Uri $VencordInstallerUrl -OutFile $tempInstaller -UseBasicParsing
         Write-Log "Vencord 安裝檔下載完成！" "SUCCESS"
 
-        # 準備執行參數
         $argsList = @("-install", "-branch", $TargetBranch)
         if ($IncludeOpenAsar) {
             $argsList += "-install-openasar"
@@ -214,7 +208,6 @@ function Invoke-VencordPatch {
         Write-Log "下載或修補失敗: $_" "ERROR"
         return $false
     } finally {
-        # 確保刪除下載的安裝檔
         if (Test-Path $tempInstaller) {
             Write-Log "正在清理暫存安裝檔: $tempInstaller" "DEBUG"
             Remove-Item -Path $tempInstaller -Force -ErrorAction SilentlyContinue
@@ -230,10 +223,8 @@ function Start-DiscordApp {
     Write-Log "正在啟動 $($DiscordInfo.Title)..." "INFO"
 
     if (Test-Path $DiscordInfo.UpdateExe) {
-        # 透過 Update.exe 啟動（Discord 標準推薦方式）
         Start-Process -FilePath $DiscordInfo.UpdateExe -ArgumentList "--processStart $($DiscordInfo.ExeName)"
     } else {
-        # 直接啟動最新 app 目錄下的 exe
         $directExe = Join-Path $DiscordInfo.LatestAppDir $DiscordInfo.ExeName
         if (Test-Path $directExe) {
             Start-Process -FilePath $directExe
@@ -268,12 +259,10 @@ function Start-WatchMode {
             $changeType = $eventArgs.ChangeType
             $fullPath = $eventArgs.FullPath
             
-            # 若有新 app-* 目錄建立或 resources 目錄被寫入
             if ($fullPath -match 'app-[\d\.]+\\resources\\app\.asar' -or ($eventArgs.Name -match '^app-[\d\.]+$' -and $changeType -eq 'Created')) {
                 Write-Host "`n[監控觸發] 偵測到 Discord 可能已更新: $fullPath" -ForegroundColor Yellow
-                Start-Sleep -Seconds 3 # 等待 Discord 更新檔案寫入完成
+                Start-Sleep -Seconds 3
                 
-                # 重新檢查並修補
                 $installed = Get-InstalledDiscords
                 foreach ($inst in $installed) {
                     if (-not (Test-IsDiscordPatched $inst)) {
@@ -308,12 +297,12 @@ function Start-WatchMode {
 function Install-DesktopShortcut {
     $scriptPath = $PSCommandPath
     if (-not $scriptPath) {
-        $scriptPath = Join-Path $PSScriptRoot "VencordAutoPatcher.ps1"
+        $scriptPath = Join-Path $PSScriptRoot "VencordFix.ps1"
     }
 
     $wshShell = New-Object -ComObject WScript.Shell
     $desktopPath = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::Desktop)
-    $shortcutPath = Join-Path $desktopPath "Discord (Vencord Auto-Patch).lnk"
+    $shortcutPath = Join-Path $desktopPath "Discord (VencordFix).lnk"
     
     $discords = Get-InstalledDiscords
     $iconLocation = ""
@@ -338,27 +327,27 @@ function Install-DesktopShortcut {
 function Set-StartupTask {
     param([bool]$Enable)
 
-    $taskName = "VencordAutoPatcherWatcher"
+    $taskName = "VencordFixWatcher"
     if ($Enable) {
         $scriptPath = $PSCommandPath
         if (-not $scriptPath) {
-            $scriptPath = Join-Path $PSScriptRoot "VencordAutoPatcher.ps1"
+            $scriptPath = Join-Path $PSScriptRoot "VencordFix.ps1"
         }
         $cmd = "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$scriptPath`" -Watch -Silent"
         
         $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
         Set-ItemProperty -Path $regKey -Name $taskName -Value $cmd
-        Write-Log "已成功將 Vencord 背景更新監控加入開機自動啟動 (HKCU Run)" "SUCCESS"
+        Write-Log "已成功將 VencordFix 背景更新監控加入開機自動啟動 (HKCU Run)" "SUCCESS"
     } else {
         $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
         Remove-ItemProperty -Path $regKey -Name $taskName -ErrorAction SilentlyContinue
-        Write-Log "已移除 Vencord 開機自動啟動設定" "SUCCESS"
+        Write-Log "已移除 VencordFix 開機自動啟動設定" "SUCCESS"
     }
 }
 
 # 主執行流程
 function Main {
-    Write-Log "=== Vencord Discord 自動修補與啟動器 ===" "TITLE"
+    Write-Log "=== VencordFix: Discord 自動修補與啟動器 ===" "TITLE"
 
     if ($InstallShortcut) {
         Install-DesktopShortcut
@@ -380,7 +369,6 @@ function Main {
         return
     }
 
-    # 1. 偵測本機已安裝的 Discord
     $discords = Get-InstalledDiscords
     if ($discords.Count -eq 0) {
         Write-Log "未偵測到任何已安裝的 Discord！請確認 Discord 是否已安裝在 %LocalAppData% 目錄下。" "ERROR"
@@ -413,7 +401,6 @@ function Main {
         }
     }
 
-    # 2. 如果需要修補或使用者指定 -Force
     if ($needPatching -or $Force) {
         if ($Force) {
             Write-Log "已指定 -Force 參數，將強制執行 Vencord 重新修補..." "WARN"
@@ -422,12 +409,10 @@ function Main {
             Write-Log "偵測到 Discord 尚未修補 Vencord (可能是 Discord 剛自動更新)，開始執行修補..." "INFO"
         }
 
-        # 先關閉運作中的 Discord 避免檔案佔用
         foreach ($d in $discordsToPatch) {
             Stop-DiscordProcesses -ProcessName $d.ProcessName
         }
 
-        # 執行修補
         $patchBranch = if ($Branch -eq "auto") { "auto" } else { $targetDiscords[0].BranchName }
         $success = Invoke-VencordPatch -TargetBranch $patchBranch -IncludeOpenAsar:$OpenAsar
 
@@ -438,7 +423,6 @@ function Main {
         Write-Log "Discord 已是最新修補狀態，無需重新修補！" "SUCCESS"
     }
 
-    # 3. 啟動 Discord
     if (-not $NoLaunch) {
         Start-DiscordApp -DiscordInfo $targetDiscords[0]
     }

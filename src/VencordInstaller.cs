@@ -4,7 +4,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 
-namespace VencordAutoPatcher
+namespace VencordFix
 {
     public class VencordInstaller
     {
@@ -12,7 +12,6 @@ namespace VencordAutoPatcher
 
         static VencordInstaller()
         {
-            // 啟用 TLS 1.2 與 TLS 1.3 支援
             try
             {
                 ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072 | (SecurityProtocolType)12288 | SecurityProtocolType.Tls12;
@@ -27,8 +26,7 @@ namespace VencordAutoPatcher
         {
             Action<string> log = logCallback ?? ((msg) => Console.WriteLine(msg));
 
-            // 使用專屬應用目錄而非根目錄 %TEMP%，大幅降低防毒軟體的 Dropper/Downloader 誤判
-            string workingDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "VencordAutoPatcher", "temp");
+            string workingDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "VencordFix", "temp");
             try
             {
                 if (!Directory.Exists(workingDir))
@@ -46,7 +44,7 @@ namespace VencordAutoPatcher
             {
                 using (WebClient client = new WebClient())
                 {
-                    client.Headers.Add("User-Agent", "VencordAutoPatcher/1.0 (Windows NT 10.0; Win64; x64)");
+                    client.Headers.Add("User-Agent", "VencordFix/1.0 (Windows NT 10.0; Win64; x64)");
                     client.DownloadFile(DefaultInstallerUrl, tempPath);
                 }
 
@@ -96,12 +94,11 @@ namespace VencordAutoPatcher
                     };
 
                     proc.Start();
-                    // 立即關閉標準輸入以避免等待鍵盤輸入
                     proc.StandardInput.Close();
                     proc.BeginOutputReadLine();
                     proc.BeginErrorReadLine();
 
-                    bool exited = proc.WaitForExit(60000); // 逾時上限 60 秒
+                    bool exited = proc.WaitForExit(60000);
                     if (!exited)
                     {
                         try { proc.Kill(); } catch { }
@@ -128,7 +125,6 @@ namespace VencordAutoPatcher
             }
             finally
             {
-                // 確保清理下載的安裝檔
                 if (File.Exists(tempPath))
                 {
                     try

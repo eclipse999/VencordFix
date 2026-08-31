@@ -2,10 +2,10 @@
 setlocal
 cd /d "%~dp0.."
 
-if exist "bin\VencordAutoPatcher.exe" (
-    "bin\VencordAutoPatcher.exe" --uninstall-startup
+if exist "bin\VencordFix.exe" (
+    "bin\VencordFix.exe" --uninstall-startup
 ) else (
-    powershell -ExecutionPolicy Bypass -File "VencordAutoPatcher.ps1" -UninstallStartup
+    powershell -ExecutionPolicy Bypass -File "VencordFix.ps1" -UninstallStartup
 )
 
 echo.

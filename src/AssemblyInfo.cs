@@ -1,12 +1,11 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-// 組件資訊與中繼資料 (降低防毒軟體對匿名/未標記可執行檔的啟發式誤判)
-[assembly: AssemblyTitle("Vencord Auto Patcher")]
+[assembly: AssemblyTitle("VencordFix")]
 [assembly: AssemblyDescription("Automated Discord Patcher and Smart Launcher for Vencord on Windows")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Vencord Community Tool")]
-[assembly: AssemblyProduct("Vencord Auto Patcher")]
+[assembly: AssemblyProduct("VencordFix")]
 [assembly: AssemblyCopyright("Copyright © 2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
