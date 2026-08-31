@@ -1,0 +1,66 @@
+name: Build and Publish Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build VencordFix (Windows)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET / Build VencordFix.exe
+        shell: pwsh
+        run: |
+          .\build.ps1
+          if (-not (Test-Path "bin\VencordFix.exe")) {
+            Write-Error "Build failed: bin\VencordFix.exe was not created."
+            exit 1
+          }
+
+      - name: Prepare Release Package
+        shell: pwsh
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          if (-not $tag) { $tag = "latest" }
+
+          $zipName = "VencordFix-$tag-Windows.zip"
+          
+          # 建立乾淨的發布包資料夾
+          $distDir = "dist"
+          New-Item -ItemType Directory -Path $distDir -Force | Out-Null
+          
+          # 複製檔案
+          Copy-Item "bin\VencordFix.exe" -Destination $distDir -Force
+          Copy-Item "Run.bat" -Destination $distDir -Force
+          Copy-Item "LICENSE" -Destination $distDir -Force
+          Copy-Item "README.md" -Destination $distDir -Force
+          
+          $distScripts = Join-Path $distDir "scripts"
+          New-Item -ItemType Directory -Path $distScripts -Force | Out-Null
+          Copy-Item "scripts\*.bat" -Destination $distScripts -Force
+
+          # 壓縮為 ZIP
+          Compress-Archive -Path "$distDir\*" -DestinationPath $zipName -Force
+          Write-Host "Created release asset: $zipName"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        with:
+          name: "VencordFix ${{ github.ref_name }}"
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            bin/VencordFix.exe
+            VencordFix-*-Windows.zip

@@ -5,6 +5,13 @@
 **專為 Windows 使用者設計的 Discord Vencord 自動修補與智慧啟動器**  
 *Discord 更新後自動無痕修補並啟動，無需手動重新安裝。*
 
+<br/>
+
+[![下載 VencordFix](https://img.shields.io/badge/⬇️_點此下載-最新發布版本-5865F2?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/eclipse999/VencordFix/releases/latest)
+
+<br/>
+
+[![Latest Release](https://img.shields.io/github/v/release/eclipse999/VencordFix?color=23A55A&label=Release)](https://github.com/eclipse999/VencordFix/releases)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-blue?logo=windows)](https://github.com/eclipse999/VencordFix)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
 [![Discord Branch](https://img.shields.io/badge/Discord-Stable%20%7C%20PTB%20%7C%20Canary%20%7C%20Dev-5865F2?logo=discord&logoColor=white)](https://discord.com)
