@@ -83,6 +83,7 @@ VencordFix/
 │   └── Test-Cleanup-Verification.ps1   # Cleanup verification script
 ├── src/                                # C# source code
 │   ├── Program.cs                      # Entry point, CLI parsing, and Tray icon
+│   ├── MainForm.cs                     # Minimalist graphical setup interface
 │   ├── DiscordApp.cs                   # Detection and process management
 │   ├── VencordInstaller.cs             # Download, patch, and cleanup logic
 │   ├── WatcherService.cs               # FileSystemWatcher for update monitoring
@@ -101,43 +102,32 @@ VencordFix/
 
 ## Quick Start Guide
 
-### Option 1: Replace Desktop Discord Shortcut (Recommended)
+### Option 1: Minimalist GUI Setup (Recommended for Non-Technical Users)
 
-1. Double-click [`scripts\Install-Shortcut.bat`](scripts/Install-Shortcut.bat).
-2. A shortcut named **`Discord (VencordFix)`** will be created on your Desktop.
-3. Use this shortcut to launch Discord:
-   - Normally: Opens Discord instantly.
-   - After a Discord update: Automatically patches Vencord in the background and opens Discord.
-
----
-
-### Option 2: Run Background Watcher on Startup
-
-If you prefer Discord to be patched as soon as updates are downloaded in the background:
-1. Double-click [`scripts\Install-Startup-Watcher.bat`](scripts/Install-Startup-Watcher.bat).
-2. The watcher silently monitors Discord directories on Windows startup and patches newly installed versions automatically.
-
-> To remove the startup task later, run [`scripts\Uninstall-Startup-Watcher.bat`](scripts/Uninstall-Startup-Watcher.bat).
+1. Double-click **`VencordFix.exe`** (or run `Run.bat`).
+2. A clean setup window will appear with two main options:
+   - **Click `1. Create Desktop Shortcut`**: Creates a `Discord (VencordFix)` shortcut on your Desktop. From now on, launch Discord from this shortcut—it automatically verifies and patches Vencord before launching.
+   - **Click `2. Background Startup Watcher`**: Silently monitors Discord in the background on Windows startup, automatically patching Vencord as soon as Discord updates.
+3. Close the window. Setup is complete!
 
 ---
 
-### Option 3: Command-Line and Manual Usage
+### Option 2: Command-Line and Portable Usage
 
-- **Direct Launch**: Double-click `Run.bat` or `bin\VencordFix.exe`.
-- **Command Line Examples**:
-  ```cmd
-  # Standard launch (Check, auto-patch if needed, then launch Discord)
-  bin\VencordFix.exe
+You can also run `VencordFix.exe` directly via command line:
+```cmd
+# Open the graphical setup window
+bin\VencordFix.exe --gui
 
-  # Force re-download and re-patch Vencord
-  bin\VencordFix.exe --force
+# Shortcut mode (silent check & launch Discord)
+bin\VencordFix.exe --launch
 
-  # Run in System Tray mode
-  bin\VencordFix.exe --tray
+# Force re-download and re-patch Vencord
+bin\VencordFix.exe --force
 
-  # Patch and install OpenAsar simultaneously
-  bin\VencordFix.exe --openasar
-  ```
+# Run in System Tray background mode
+bin\VencordFix.exe --tray
+```
 
 ---
 

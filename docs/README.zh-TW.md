@@ -83,6 +83,7 @@ VencordFix/
 │   └── Test-Cleanup-Verification.ps1   # 暫存檔清理驗證腳本
 ├── src/                                # C# 原生原始碼
 │   ├── Program.cs                      # 程式進入點、參數解析與托盤介面
+│   ├── MainForm.cs                     # 極簡圖形設定視窗
 │   ├── DiscordApp.cs                   # Discord 安裝偵測與啟動
 │   ├── VencordInstaller.cs             # 下載、修補與清理邏輯
 │   ├── WatcherService.cs               # FileSystemWatcher 即時監控
@@ -101,43 +102,32 @@ VencordFix/
 
 ## 快速開始指南
 
-### 方式一：取代桌面 Discord 捷徑（推薦）
+### 方式一：極簡圖形介面設定（推薦小白用戶）
 
-1. 雙擊執行 [`scripts\Install-Shortcut.bat`](../scripts/Install-Shortcut.bat)。
-2. 桌面上會產生一個 **`Discord (VencordFix)`** 捷徑。
-3. 日常直接使用此捷徑開啟 Discord：
-   - 平日：直接秒速開啟 Discord。
-   - Discord 更新後：點擊會自動在背景修補並開啟 Discord，無需手動重新安裝。
-
----
-
-### 方式二：設定開機後台自動監控
-
-如果希望 Discord 在背景默默更新時就被自動修補：
-1. 雙擊執行 [`scripts\Install-Startup-Watcher.bat`](../scripts/Install-Startup-Watcher.bat)。
-2. 程式會在 Windows 開機時於背景靜默監控 Discord 目錄，一旦 Discord 下載新版本，會即時自動完成 Vencord 修補。
-
-> 若日後想取消開機啟動，只需執行 [`scripts\Uninstall-Startup-Watcher.bat`](../scripts/Uninstall-Startup-Watcher.bat)。
+1. 直接雙擊執行 **`VencordFix.exe`**（或 `Run.bat`）。
+2. 視窗會跳出極簡設定介面，提供兩個核心選項：
+   - **點擊「1. 在桌面建立啟動捷徑」**：在桌面產生 `Discord (VencordFix)` 捷徑。未來直接由此捷徑開啟 Discord，啟動前會自動在背景檢查並修補 Vencord。
+   - **點擊「2. 開機背景監控」**：設定 Windows 開機後台靜默守護，當 Discord 自動下載更新時即時在背景修補。
+3. 擇一設定完成後即可關閉視窗，輕鬆搞定！
 
 ---
 
-### 方式三：手動與命令列執行
+### 方式二：命令列與進階執行
 
-- **直接執行**：雙擊 `Run.bat` 或 `bin\VencordFix.exe`。
-- **命令列範例**：
-  ```cmd
-  # 一般啟動 (自動檢查修補並啟動 Discord)
-  bin\VencordFix.exe
+您也可以透過命令列直接調用 `VencordFix.exe`：
+```cmd
+# 開啟圖形設定視窗
+bin\VencordFix.exe --gui
 
-  # 強制重新修補 Vencord (即使目前已修補)
-  bin\VencordFix.exe --force
+# 捷徑模式 (靜默檢查並啟動 Discord)
+bin\VencordFix.exe --launch
 
-  # 啟動系統托盤守護模式
-  bin\VencordFix.exe --tray
+# 強制重新修補 Vencord
+bin\VencordFix.exe --force
 
-  # 修補並一併安裝 OpenAsar
-  bin\VencordFix.exe --openasar
-  ```
+# 啟動系統托盤守護模式
+bin\VencordFix.exe --tray
+```
 
 ---
 

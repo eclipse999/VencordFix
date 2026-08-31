@@ -9,6 +9,23 @@ namespace VencordFix
     {
         public const string StartupKeyName = "VencordFixWatcher";
 
+        public static bool IsStartupEnabled()
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", false))
+                {
+                    if (key != null)
+                    {
+                        object val = key.GetValue(StartupKeyName);
+                        return val != null;
+                    }
+                }
+            }
+            catch { }
+            return false;
+        }
+
         public static bool CreateDesktopShortcut(string iconPath = null)
         {
             try
@@ -27,6 +44,7 @@ namespace VencordFix
                 dynamic shell = Activator.CreateInstance(shellType);
                 dynamic shortcut = shell.CreateShortcut(shortcutLocation);
                 shortcut.TargetPath = exePath;
+                shortcut.Arguments = "--launch";
                 shortcut.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
                 shortcut.Description = "啟動 Discord 並自動檢測與修補 Vencord";
 

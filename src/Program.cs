@@ -12,6 +12,15 @@ namespace VencordFix
         [STAThread]
         static void Main(string[] args)
         {
+            // 若沒有傳入任何參數，預設開啟極簡 GUI 設定視窗
+            if (args.Length == 0)
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new MainForm());
+                return;
+            }
+
             bool force = false;
             bool noLaunch = false;
             bool openAsar = false;
@@ -21,6 +30,7 @@ namespace VencordFix
             bool installStartup = false;
             bool uninstallStartup = false;
             bool silent = false;
+            bool gui = false;
             string branch = "auto";
 
             for (int i = 0; i < args.Length; i++)
@@ -31,6 +41,10 @@ namespace VencordFix
                     ShowHelp();
                     return;
                 }
+                else if (arg == "--gui")
+                {
+                    gui = true;
+                }
                 else if (arg == "-f" || arg == "--force")
                 {
                     force = true;
@@ -38,6 +52,11 @@ namespace VencordFix
                 else if (arg == "--no-launch")
                 {
                     noLaunch = true;
+                }
+                else if (arg == "--launch")
+                {
+                    // 捷徑啟動模式：靜默檢查並啟動 Discord
+                    silent = true;
                 }
                 else if (arg == "--openasar")
                 {
@@ -71,6 +90,14 @@ namespace VencordFix
                 {
                     branch = args[++i].ToLowerInvariant();
                 }
+            }
+
+            if (gui)
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new MainForm());
+                return;
             }
 
             if (installShortcut)
@@ -116,6 +143,8 @@ namespace VencordFix
             Console.WriteLine("  VencordFix.exe [選項]");
             Console.WriteLine("");
             Console.WriteLine("選項:");
+            Console.WriteLine("      --gui                 開啟極簡圖形設定介面 (無參數雙擊時亦會開啟)");
+            Console.WriteLine("      --launch              捷徑模式：自動檢查並秒速啟動 Discord");
             Console.WriteLine("  -b, --branch <branch>     指定 Discord 分支 (auto, stable, ptb, canary, dev)。預設: auto");
             Console.WriteLine("  -f, --force               強制重新下載並修補 Vencord (即使目前已被修補)");
             Console.WriteLine("      --no-launch           修補後不自動啟動 Discord");
@@ -281,6 +310,9 @@ namespace VencordFix
             }
 
             ContextMenu contextMenu = new ContextMenu();
+            contextMenu.MenuItems.Add("開啟設定介面", (s, e) => {
+                new MainForm().Show();
+            });
             contextMenu.MenuItems.Add("修補並啟動 Discord", (s, e) => {
                 RunLauncher("auto", false, false, false, false);
             });
