@@ -5,7 +5,7 @@
 **專為 Windows 使用者設計的 Discord Vencord 自動修補與智慧啟動器**  
 *再也不用手動重新安裝 Vencord！Discord 更新後自動無痕修補並啟動。*
 
-[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-blue?logo=windows)](https://github.com/)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-blue?logo=windows)](https://github.com/eclipse999/VencordFix)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
 [![Discord Branch](https://img.shields.io/badge/Discord-Stable%20%7C%20PTB%20%7C%20Canary%20%7C%20Dev-5865F2?logo=discord&logoColor=white)](https://discord.com)
 [![Vencord](https://img.shields.io/badge/Mod-Vencord-informational)](https://vencord.dev)
