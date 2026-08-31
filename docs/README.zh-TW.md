@@ -57,12 +57,13 @@
 
 ## 核心功能特色
 
-- **快速驗證**：直接檢查 Discord 版本目錄與 `resources\_app.asar` 結構。
+- **極簡圖形介面**：提供 2 個核心按鈕的設定面板，3 秒內完成桌面捷徑建立或開機背景監控。
+- **快速驗證**：直接檢查 Discord 版本目錄與 `resources\_app.asar` 結構（耗時 < 10ms）。
 - **官方來源**：自 [Vencord 官方發行庫](https://github.com/Vencord/Installer) 自動下載最新修補檔。
 - **無痕清理**：透過 `finally` 機制確保修補完成後立即刪除下載的安裝檔。
 - **多版本支援**：支援 Discord (Stable)、Discord PTB、Discord Canary 與 Discord Development。
 - **防毒友善設計**：使用專屬隔離目錄 `%LocalAppData%\VencordFix\temp\`，避免觸發 Dropper 誤判。
-- **零外部依賴**：內建提供已編譯完成的獨立執行檔 `VencordFix.exe`（約 300KB）與開源 PowerShell 腳本。
+- **零外部依賴**：內建提供已編譯完成的獨立執行檔 `VencordFix.exe`（約 55KB，內嵌專屬圖示）與開源 PowerShell 腳本。
 
 ---
 
@@ -70,7 +71,7 @@
 
 ```mermaid
 flowchart TD
-    A["啟動 Discord 捷徑<br/>(執行 VencordFix)"] --> B{"檢查 Discord<br/>修補狀態"}
+    A["啟動 Discord<br/>(捷徑 / 背景監控)"] --> B{"檢查 Discord<br/>修補狀態"}
     B -->|已修補| C["秒速啟動 Discord<br/>(耗時 &lt; 10ms)"]
     B -->|未修補 / 剛更新| D["關閉運作中的<br/>Discord 程序"]
     D --> E["下載官方最新<br/>Vencord 安裝檔"]
@@ -86,14 +87,17 @@ flowchart TD
 ```text
 VencordFix/
 │
+├── assets/                             # 圖示與視覺資源庫
+│   └── app.ico                         # VencordFix 專屬工具圖示
 ├── bin/                                # 獨立編譯執行檔 (VencordFix.exe)
 ├── docs/                               # 多語系文檔庫
 │   └── README.zh-TW.md                 # 繁體中文說明手冊
-├── scripts/                            # 輔助工具
+├── scripts/                            # 輔助與實測腳本
 │   ├── Install-Shortcut.bat            # 建立桌面捷徑
 │   ├── Install-Startup-Watcher.bat     # 設定開機背景監控
 │   ├── Uninstall-Startup-Watcher.bat   # 移除開機背景監控
-│   └── Test-Cleanup-Verification.ps1   # 暫存檔清理驗證腳本
+│   ├── Test-Cleanup-Verification.ps1   # 暫存檔清理驗證腳本
+│   └── Test-Watcher-Simulation.ps1     # 開機監控端到端實測腳本
 ├── src/                                # C# 原生原始碼
 │   ├── Program.cs                      # 程式進入點、參數解析與托盤介面
 │   ├── MainForm.cs                     # 極簡圖形設定視窗

@@ -57,12 +57,13 @@ Whenever Discord updates in the background on Windows, its updater creates a new
 
 ## Features
 
-- **Fast Verification**: Inspects Discord's version directory and `resources\_app.asar` state directly.
+- **Minimalist GUI**: Lightweight 2-button setup window to create desktop shortcuts or enable startup watcher in seconds.
+- **Fast Verification**: Inspects Discord's version directory and `resources\_app.asar` state directly (< 10ms).
 - **Official Releases**: Downloads the latest installer from the [official Vencord repository](https://github.com/Vencord/Installer).
 - **Clean File Management**: Downloaded installer files are deleted immediately after execution via `finally` blocks.
 - **Multi-Branch Support**: Supports Discord (Stable), Discord PTB, Discord Canary, and Discord Development.
 - **Antivirus Safe**: Uses a dedicated AppData path (`%LocalAppData%\VencordFix\temp\`) instead of `%TEMP%` to avoid heuristic dropper warnings.
-- **Zero Dependencies**: Includes a pre-compiled standalone binary `bin\VencordFix.exe` (~300KB) and an open-source PowerShell script.
+- **Zero Dependencies**: Includes a pre-compiled standalone binary `bin\VencordFix.exe` (~55KB) with embedded icons and an open-source PowerShell script.
 
 ---
 
@@ -70,7 +71,7 @@ Whenever Discord updates in the background on Windows, its updater creates a new
 
 ```mermaid
 flowchart TD
-    A["Start Discord<br/>(Run VencordFix)"] --> B{"Check Discord<br/>Patch Status"}
+    A["Launch Discord<br/>(Shortcut / Watcher)"] --> B{"Check Discord<br/>Patch Status"}
     B -->|Already Patched| C["Instant Launch<br/>(&lt; 10ms, no delay)"]
     B -->|Unpatched / Updated| D["Close Discord<br/>(Release files)"]
     D --> E["Download Latest<br/>Vencord Installer"]
@@ -86,6 +87,8 @@ flowchart TD
 ```text
 VencordFix/
 │
+├── assets/                             # Icons and visual assets
+│   └── app.ico                         # Custom VencordFix tool icon
 ├── bin/                                # Compiled standalone binary (VencordFix.exe)
 ├── docs/                               # Translations and documentation
 │   └── README.zh-TW.md                 # Traditional Chinese documentation
@@ -93,7 +96,8 @@ VencordFix/
 │   ├── Install-Shortcut.bat            # Creates Desktop shortcut
 │   ├── Install-Startup-Watcher.bat     # Registers startup watcher
 │   ├── Uninstall-Startup-Watcher.bat   # Removes startup watcher
-│   └── Test-Cleanup-Verification.ps1   # Cleanup verification script
+│   ├── Test-Cleanup-Verification.ps1   # Cleanup verification script
+│   └── Test-Watcher-Simulation.ps1     # Startup watcher verification script
 ├── src/                                # C# source code
 │   ├── Program.cs                      # Entry point, CLI parsing, and Tray icon
 │   ├── MainForm.cs                     # Minimalist graphical setup interface
