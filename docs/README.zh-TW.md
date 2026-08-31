@@ -92,12 +92,10 @@ VencordFix/
 ├── bin/                                # 獨立編譯執行檔 (VencordFix.exe)
 ├── docs/                               # 多語系文檔庫
 │   └── README.zh-TW.md                 # 繁體中文說明手冊
-├── scripts/                            # 輔助與實測腳本
+├── scripts/                            # 輔助設定腳本
 │   ├── Install-Shortcut.bat            # 建立桌面捷徑
 │   ├── Install-Startup-Watcher.bat     # 設定開機背景監控
-│   ├── Uninstall-Startup-Watcher.bat   # 移除開機背景監控
-│   ├── Test-Cleanup-Verification.ps1   # 暫存檔清理驗證腳本
-│   └── Test-Watcher-Simulation.ps1     # 開機監控端到端實測腳本
+│   └── Uninstall-Startup-Watcher.bat   # 移除開機背景監控
 ├── src/                                # C# 原生原始碼
 │   ├── Program.cs                      # 程式進入點、參數解析與托盤介面
 │   ├── MainForm.cs                     # 極簡圖形設定視窗

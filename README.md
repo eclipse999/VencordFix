@@ -92,12 +92,10 @@ VencordFix/
 ├── bin/                                # Compiled standalone binary (VencordFix.exe)
 ├── docs/                               # Translations and documentation
 │   └── README.zh-TW.md                 # Traditional Chinese documentation
-├── scripts/                            # Setup and verification helpers
+├── scripts/                            # One-click helper scripts
 │   ├── Install-Shortcut.bat            # Creates Desktop shortcut
 │   ├── Install-Startup-Watcher.bat     # Registers startup watcher
-│   ├── Uninstall-Startup-Watcher.bat   # Removes startup watcher
-│   ├── Test-Cleanup-Verification.ps1   # Cleanup verification script
-│   └── Test-Watcher-Simulation.ps1     # Startup watcher verification script
+│   └── Uninstall-Startup-Watcher.bat   # Removes startup watcher
 ├── src/                                # C# source code
 │   ├── Program.cs                      # Entry point, CLI parsing, and Tray icon
 │   ├── MainForm.cs                     # Minimalist graphical setup interface
