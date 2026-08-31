@@ -18,12 +18,7 @@
 
 <div align="center">
 
-### ⬇️ [Download VencordFix (Latest Release)](https://github.com/eclipse999/VencordFix/releases/latest)
-
-| Package | Direct Download | Description |
-| :--- | :---: | :--- |
-| **VencordFix.exe** | [**⬇️ Download .exe**](https://github.com/eclipse999/VencordFix/releases/latest/download/VencordFix.exe) | Standalone Portable Executable (Recommended, No install needed) |
-| **VencordFix-Windows.zip** | [**⬇️ Download .zip**](https://github.com/eclipse999/VencordFix/releases/latest) | Complete Package (Includes standalone executable & helper scripts) |
+## ⬇️ [Download VencordFix (Latest Release)](https://github.com/eclipse999/VencordFix/releases/latest)
 
 </div>
 

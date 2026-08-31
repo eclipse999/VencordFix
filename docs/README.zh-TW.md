@@ -18,12 +18,7 @@
 
 <div align="center">
 
-### ⬇️ [點此下載 VencordFix 最新發布版本](https://github.com/eclipse999/VencordFix/releases/latest)
-
-| 發布項目 | 下載連結 | 說明 |
-| :--- | :---: | :--- |
-| **VencordFix.exe** | [**⬇️ 下載獨立執行檔 (.exe)**](https://github.com/eclipse999/VencordFix/releases/latest/download/VencordFix.exe) | 單檔免安裝獨立版（推薦，雙擊即可開啟極簡設定） |
-| **VencordFix-Windows.zip** | [**⬇️ 下載完整壓縮包 (.zip)**](https://github.com/eclipse999/VencordFix/releases/latest) | 包含獨立執行檔與輔助腳本之完整組合包 |
+## ⬇️ [點此下載 VencordFix 最新版本 (Latest Release)](https://github.com/eclipse999/VencordFix/releases/latest)
 
 </div>
 
