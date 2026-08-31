@@ -5,19 +5,25 @@
 **Automated Discord Patcher, Updater, and Launcher for Vencord on Windows**  
 *Automatically detects updates, patches Discord silently, and cleans up temporary files.*
 
-<br/>
-
-[![Download VencordFix](https://img.shields.io/badge/⬇️_Download-Latest_Release-5865F2?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/eclipse999/VencordFix/releases/latest)
-
-<br/>
-
 [![Latest Release](https://img.shields.io/github/v/release/eclipse999/VencordFix?color=23A55A&label=Release)](https://github.com/eclipse999/VencordFix/releases)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-blue?logo=windows)](https://github.com/eclipse999/VencordFix)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Discord Branch](https://img.shields.io/badge/Discord-Stable%20%7C%20PTB%20%7C%20Canary%20%7C%20Dev-5865F2?logo=discord&logoColor=white)](https://discord.com)
-[![Vencord](https://img.shields.io/badge/Mod-Vencord-informational)](https://vencord.dev)
 
 **English** | [繁體中文](docs/README.zh-TW.md)
+
+</div>
+
+---
+
+<div align="center">
+
+### ⬇️ [Download VencordFix (Latest Release)](https://github.com/eclipse999/VencordFix/releases/latest)
+
+| Package | Direct Download | Description |
+| :--- | :---: | :--- |
+| **VencordFix.exe** | [**⬇️ Download .exe**](https://github.com/eclipse999/VencordFix/releases/latest/download/VencordFix.exe) | Standalone Portable Executable (Recommended, No install needed) |
+| **VencordFix-Windows.zip** | [**⬇️ Download .zip**](https://github.com/eclipse999/VencordFix/releases/latest) | Complete Package (Includes standalone executable & helper scripts) |
 
 </div>
 
