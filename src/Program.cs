@@ -1,27 +1,74 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using System.Drawing;
 
 namespace VencordFix
 {
     static class Program
     {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GetStdHandle(int nStdHandle);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool AttachConsole(int dwProcessId);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool AllocConsole();
+
+        private const int STD_OUTPUT_HANDLE = -11;
+        private static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
+        private const int ATTACH_PARENT_PROCESS = -1;
+        private static bool _consoleAttached = false;
+
+        private static void EnsureConsole(bool allowAlloc = false)
+        {
+            if (_consoleAttached) return;
+
+            IntPtr stdOutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+            bool isRedirected = (stdOutHandle != IntPtr.Zero && stdOutHandle != INVALID_HANDLE_VALUE);
+
+            if (!isRedirected)
+            {
+                if (AttachConsole(ATTACH_PARENT_PROCESS))
+                {
+                    _consoleAttached = true;
+                }
+                else if (allowAlloc)
+                {
+                    _consoleAttached = AllocConsole();
+                }
+            }
+            else
+            {
+                _consoleAttached = true;
+            }
+
+            if (_consoleAttached)
+            {
+                try
+                {
+                    var stdOut = new StreamWriter(Console.OpenStandardOutput(), Encoding.UTF8) { AutoFlush = true };
+                    var stdErr = new StreamWriter(Console.OpenStandardError(), Encoding.UTF8) { AutoFlush = true };
+                    Console.SetOut(stdOut);
+                    Console.SetError(stdErr);
+                    Console.OutputEncoding = Encoding.UTF8;
+                }
+                catch { }
+            }
+        }
+
         [STAThread]
         static void Main(string[] args)
         {
-            try
-            {
-                Console.OutputEncoding = Encoding.UTF8;
-            }
-            catch { }
-
-            // 若沒有傳入任何參數，預設開啟極簡 GUI 設定視窗
-            if (args.Length == 0)
+            // 若沒有傳入任何參數，預設開啟極簡 GUI 設定視窗 (完全不掛載或建立終端機)
+            if (args == null || args.Length == 0)
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -39,6 +86,7 @@ namespace VencordFix
             bool uninstallStartup = false;
             bool silent = false;
             bool gui = false;
+            bool showHelp = false;
             string branch = "auto";
 
             for (int i = 0; i < args.Length; i++)
@@ -46,8 +94,7 @@ namespace VencordFix
                 string arg = args[i].ToLowerInvariant();
                 if (arg == "-h" || arg == "--help" || arg == "/?")
                 {
-                    ShowHelp();
-                    return;
+                    showHelp = true;
                 }
                 else if (arg == "--gui")
                 {
@@ -107,6 +154,24 @@ namespace VencordFix
                 return;
             }
 
+            if (tray)
+            {
+                RunTrayApp();
+                return;
+            }
+
+            if (showHelp)
+            {
+                EnsureConsole(false);
+                ShowHelp();
+                return;
+            }
+
+            if (!silent)
+            {
+                EnsureConsole(watch);
+            }
+
             if (installShortcut)
             {
                 ShortcutHelper.CreateDesktopShortcut();
@@ -125,12 +190,6 @@ namespace VencordFix
                 return;
             }
 
-            if (tray)
-            {
-                RunTrayApp();
-                return;
-            }
-
             if (watch)
             {
                 RunWatcherConsole();
@@ -142,28 +201,57 @@ namespace VencordFix
 
         static void ShowHelp()
         {
-            Console.WriteLine("==========================================================");
-            Console.WriteLine("  VencordFix for Windows");
-            Console.WriteLine("  Discord 自動修補與智慧啟動器");
-            Console.WriteLine("==========================================================");
-            Console.WriteLine("用法:");
-            Console.WriteLine("  VencordFix.exe [選項]");
-            Console.WriteLine("");
-            Console.WriteLine("選項:");
-            Console.WriteLine("      --gui                 開啟極簡圖形設定介面 (無參數雙擊時亦會開啟)");
-            Console.WriteLine("      --launch              捷徑模式：自動檢查並秒速啟動 Discord");
-            Console.WriteLine("  -b, --branch <branch>     指定 Discord 分支 (auto, stable, ptb, canary, dev)。預設: auto");
-            Console.WriteLine("  -f, --force               強制重新下載並修補 Vencord (即使目前已被修補)");
-            Console.WriteLine("      --no-launch           修補後不自動啟動 Discord");
-            Console.WriteLine("      --openasar            一併安裝 OpenAsar");
-            Console.WriteLine("  -w, --watch               背景監控模式 (監聽 Discord 自動更新並即時修補)");
-            Console.WriteLine("      --tray                以系統托盤常駐模式運行");
-            Console.WriteLine("      --install-shortcut    在桌面建立 VencordFix 啟動捷徑");
-            Console.WriteLine("      --install-startup     將背景更新監控加入開機自動啟動");
-            Console.WriteLine("      --uninstall-startup   移除開機自動啟動");
-            Console.WriteLine("  -s, --silent              靜默執行模式");
-            Console.WriteLine("  -h, --help                顯示說明畫面");
-            Console.WriteLine("==========================================================");
+            bool isZh = CultureInfo.CurrentUICulture.Name.StartsWith("zh", StringComparison.OrdinalIgnoreCase);
+            if (isZh)
+            {
+                Console.WriteLine("==========================================================");
+                Console.WriteLine("  VencordFix for Windows");
+                Console.WriteLine("  Discord 自動修補與智慧啟動器");
+                Console.WriteLine("==========================================================");
+                Console.WriteLine("用法:");
+                Console.WriteLine("  VencordFix.exe [選項]");
+                Console.WriteLine("");
+                Console.WriteLine("選項:");
+                Console.WriteLine("      --gui                 開啟極簡圖形設定介面 (無參數雙擊時亦會開啟)");
+                Console.WriteLine("      --launch              捷徑模式：自動檢查並秒速啟動 Discord");
+                Console.WriteLine("  -b, --branch <branch>     指定 Discord 分支 (auto, stable, ptb, canary, dev)。預設: auto");
+                Console.WriteLine("  -f, --force               強制重新下載並修補 Vencord (即使目前已被修補)");
+                Console.WriteLine("      --no-launch           修補後不自動啟動 Discord");
+                Console.WriteLine("      --openasar            一併安裝 OpenAsar");
+                Console.WriteLine("  -w, --watch               背景監控模式 (監聽 Discord 自動更新並即時修補)");
+                Console.WriteLine("      --tray                以系統托盤常駐模式運行");
+                Console.WriteLine("      --install-shortcut    在桌面建立 VencordFix 啟動捷徑");
+                Console.WriteLine("      --install-startup     將背景更新監控加入開機自動啟動");
+                Console.WriteLine("      --uninstall-startup   移除開機自動啟動");
+                Console.WriteLine("  -s, --silent              靜默執行模式");
+                Console.WriteLine("  -h, --help                顯示說明畫面");
+                Console.WriteLine("==========================================================");
+            }
+            else
+            {
+                Console.WriteLine("==========================================================");
+                Console.WriteLine("  VencordFix for Windows");
+                Console.WriteLine("  Automated Discord Patcher & Smart Launcher");
+                Console.WriteLine("==========================================================");
+                Console.WriteLine("Usage:");
+                Console.WriteLine("  VencordFix.exe [options]");
+                Console.WriteLine("");
+                Console.WriteLine("Options:");
+                Console.WriteLine("      --gui                 Open graphical setup interface (default on double-click)");
+                Console.WriteLine("      --launch              Shortcut mode: check & launch Discord silently");
+                Console.WriteLine("  -b, --branch <branch>     Specify Discord branch (auto, stable, ptb, canary, dev). Default: auto");
+                Console.WriteLine("  -f, --force               Force re-download and re-patch Vencord");
+                Console.WriteLine("      --no-launch           Patch only; do not launch Discord");
+                Console.WriteLine("      --openasar            Install OpenAsar along with Vencord");
+                Console.WriteLine("  -w, --watch               Background watcher mode (monitor Discord updates in real-time)");
+                Console.WriteLine("      --tray                Run in system tray background mode");
+                Console.WriteLine("      --install-shortcut    Create desktop shortcut");
+                Console.WriteLine("      --install-startup     Register background watcher in Windows Startup (HKCU Run)");
+                Console.WriteLine("      --uninstall-startup   Remove Windows Startup entry");
+                Console.WriteLine("  -s, --silent              Silent mode (suppress console output)");
+                Console.WriteLine("  -h, --help                Display help screen");
+                Console.WriteLine("==========================================================");
+            }
         }
 
         static void RunLauncher(string branch, bool force, bool noLaunch, bool openAsar, bool silent)
@@ -297,7 +385,8 @@ namespace VencordFix
             Application.SetCompatibleTextRenderingDefault(false);
 
             NotifyIcon trayIcon = new NotifyIcon();
-            trayIcon.Text = "VencordFix 守護中";
+            bool isZh = CultureInfo.CurrentUICulture.Name.StartsWith("zh", StringComparison.OrdinalIgnoreCase);
+            trayIcon.Text = isZh ? "VencordFix 守護中" : "VencordFix Watcher Active";
             
             string selfExe = Process.GetCurrentProcess().MainModule.FileName;
             try
@@ -318,22 +407,22 @@ namespace VencordFix
             }
 
             ContextMenu contextMenu = new ContextMenu();
-            contextMenu.MenuItems.Add("開啟設定介面", (s, e) => {
+            contextMenu.MenuItems.Add(isZh ? "開啟設定介面" : "Open Settings...", (s, e) => {
                 new MainForm().Show();
             });
-            contextMenu.MenuItems.Add("修補並啟動 Discord", (s, e) => {
+            contextMenu.MenuItems.Add(isZh ? "修補並啟動 Discord" : "Patch & Launch Discord", (s, e) => {
                 RunLauncher("auto", false, false, false, false);
             });
-            contextMenu.MenuItems.Add("強制重新修補 Vencord", (s, e) => {
+            contextMenu.MenuItems.Add(isZh ? "強制重新修補 Vencord" : "Force Re-patch Vencord", (s, e) => {
                 RunLauncher("auto", true, false, false, false);
             });
             contextMenu.MenuItems.Add("-");
-            contextMenu.MenuItems.Add("建立桌面捷徑", (s, e) => {
+            contextMenu.MenuItems.Add(isZh ? "建立桌面捷徑" : "Create Desktop Shortcut", (s, e) => {
                 ShortcutHelper.CreateDesktopShortcut();
-                trayIcon.ShowBalloonTip(3000, "VencordFix", "已成功在桌面建立捷徑！", ToolTipIcon.Info);
+                trayIcon.ShowBalloonTip(3000, "VencordFix", isZh ? "已成功在桌面建立捷徑！" : "Successfully created Desktop shortcut!", ToolTipIcon.Info);
             });
             contextMenu.MenuItems.Add("-");
-            contextMenu.MenuItems.Add("結束 (Exit)", (s, e) => {
+            contextMenu.MenuItems.Add(isZh ? "結束 (Exit)" : "Exit", (s, e) => {
                 trayIcon.Visible = false;
                 Application.Exit();
             });
@@ -342,14 +431,14 @@ namespace VencordFix
             trayIcon.Visible = true;
 
             var watcher = new WatcherService((msg) => {
-                if (msg.Contains("已成功完成 Vencord 修補"))
+                if (msg.Contains("已成功完成 Vencord 修補") || msg.IndexOf("Vencord", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    trayIcon.ShowBalloonTip(3000, "VencordFix", "Discord 已自動重新修補 Vencord！", ToolTipIcon.Info);
+                    trayIcon.ShowBalloonTip(3000, "VencordFix", isZh ? "Discord 已自動重新修補 Vencord！" : "Discord re-patched with Vencord automatically!", ToolTipIcon.Info);
                 }
             });
             watcher.Start();
 
-            trayIcon.ShowBalloonTip(2000, "VencordFix", "VencordFix 背景更新監控已在系統托盤中啟動！", ToolTipIcon.Info);
+            trayIcon.ShowBalloonTip(2000, "VencordFix", isZh ? "VencordFix 背景更新監控已在系統托盤中啟動！" : "VencordFix background watcher started in system tray!", ToolTipIcon.Info);
 
             Application.Run();
 

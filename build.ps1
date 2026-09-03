@@ -22,12 +22,12 @@ $outputExe = Join-Path $outputDir "VencordFix.exe"
 $srcFiles = (Get-ChildItem -Path (Join-Path $PSScriptRoot "src") -Filter "*.cs").FullName
 
 # 優先使用 VencordFix 專屬 assets/app.ico
-$iconOption = ""
+$iconOption = $null
 $customIco = Join-Path $PSScriptRoot "assets\app.ico"
 if (Test-Path $customIco) {
-    $iconOption = "/win32icon:`"$customIco`""
+    $iconOption = "/win32icon:$customIco"
 } elseif (Test-Path "$env:LOCALAPPDATA\Discord\app.ico") {
-    $iconOption = "/win32icon:`"$env:LOCALAPPDATA\Discord\app.ico`""
+    $iconOption = "/win32icon:$env:LOCALAPPDATA\Discord\app.ico"
 }
 
 $refs = @(
@@ -38,13 +38,27 @@ $refs = @(
     "Microsoft.CSharp.dll"
 )
 
-$rArgs = ($refs | ForEach-Object { "/r:$_" }) -join " "
-$srcArgs = ($srcFiles | ForEach-Object { "`"$_`"" }) -join " "
+$compileArgs = @(
+    "/target:winexe",
+    "/optimize+",
+    "/nologo",
+    "/out:$outputExe"
+)
 
-$cmd = "& `"$cscPath`" /target:exe /optimize+ /nologo /out:`"$outputExe`" $iconOption $rArgs $srcArgs"
+if ($iconOption) {
+    $compileArgs += $iconOption
+}
+
+foreach ($r in $refs) {
+    $compileArgs += "/r:$r"
+}
+
+foreach ($s in $srcFiles) {
+    $compileArgs += $s
+}
 
 Write-Host "正在編譯 VencordFix.exe..." -ForegroundColor Cyan
-Invoke-Expression $cmd
+& $cscPath $compileArgs
 
 if ($LASTEXITCODE -eq 0 -and (Test-Path $outputExe)) {
     Write-Host "編譯成功: $outputExe" -ForegroundColor Green
