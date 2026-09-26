@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET / Build VencordFix.exe
         shell: pwsh
@@ -54,7 +54,7 @@ jobs:
           Write-Host "Created release asset: $zipName"
 
       - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
           name: "VencordFix ${{ github.ref_name }}"
