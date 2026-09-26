@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     編譯 VencordFix.exe
 #>
@@ -35,6 +35,7 @@ $refs = @(
     "System.Core.dll",
     "System.Windows.Forms.dll",
     "System.Drawing.dll",
+    "System.Runtime.Serialization.dll",
     "Microsoft.CSharp.dll"
 )
 

@@ -125,18 +125,74 @@ namespace VencordFix
             }
             finally
             {
-                if (File.Exists(tempPath))
+                DeleteFileWithRetry(tempPath, log);
+                PurgeStaleDownloads(workingDir, log);
+            }
+        }
+
+        /// <summary>
+        /// 刪除暫存安裝檔。安裝程式剛結束時檔案可能仍被系統鎖定，因此加入重試機制。
+        /// </summary>
+        private static void DeleteFileWithRetry(string path, Action<string> log)
+        {
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+            {
+                return;
+            }
+
+            for (int attempt = 0; attempt < 5; attempt++)
+            {
+                try
+                {
+                    File.Delete(path);
+                    log("[*] 已清理暫存安裝檔。");
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    if (attempt == 4)
+                    {
+                        log("[-] 清理暫存檔失敗 (可稍後手動刪除): " + ex.Message);
+                        return;
+                    }
+
+                    System.Threading.Thread.Sleep(400);
+                }
+            }
+        }
+
+        /// <summary>清除先前執行遺留在 temp 目錄的安裝檔。</summary>
+        private static void PurgeStaleDownloads(string workingDir, Action<string> log)
+        {
+            try
+            {
+                if (!Directory.Exists(workingDir))
+                {
+                    return;
+                }
+
+                foreach (string stale in Directory.GetFiles(workingDir, "VencordInstallerCli_*.exe"))
                 {
                     try
                     {
-                        File.Delete(tempPath);
-                        log("[*] 已清理暫存安裝檔。");
+                        FileInfo info = new FileInfo(stale);
+
+                        // 保留剛建立的檔案，避免誤刪其他正在執行的實例。
+                        if ((DateTime.UtcNow - info.LastWriteTimeUtc).TotalMinutes < 10)
+                        {
+                            continue;
+                        }
+
+                        File.Delete(stale);
+                        log("[*] 已清除殘留的暫存安裝檔: " + info.Name);
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        log("[-] 清理暫存檔失敗: " + ex.Message);
                     }
                 }
+            }
+            catch
+            {
             }
         }
     }

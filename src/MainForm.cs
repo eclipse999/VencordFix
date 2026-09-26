@@ -20,7 +20,10 @@ namespace VencordFix
         ShortcutFail,
         StartupEnabled,
         StartupDisabled,
-        StartupFail
+        StartupFail,
+        SyncEnabled,
+        SyncDisabled,
+        SyncFail
     }
 
     public class MainForm : Form
@@ -36,6 +39,8 @@ namespace VencordFix
         private Label _lblShortcutDesc;
         private Button _btnStartup;
         private Label _lblStartupDesc;
+        private Button _btnSync;
+        private Label _lblSyncDesc;
         private Label _lblFeedback;
 
         public MainForm()
@@ -61,7 +66,7 @@ namespace VencordFix
         private void InitializeComponent()
         {
             this.Text = "VencordFix";
-            this.ClientSize = new Size(400, 335);
+            this.ClientSize = new Size(400, 425);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -171,12 +176,30 @@ namespace VencordFix
             _lblStartupDesc.AutoSize = true;
             this.Controls.Add(_lblStartupDesc);
 
+            // 按鈕 3：啟動前同步最新 Vencord
+            _btnSync = new Button();
+            _btnSync.Location = new Point(25, 259);
+            _btnSync.Size = new Size(350, 42);
+            _btnSync.FlatStyle = FlatStyle.Flat;
+            _btnSync.FlatAppearance.BorderSize = 0;
+            _btnSync.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+            _btnSync.Cursor = Cursors.Hand;
+            _btnSync.Click += BtnSync_Click;
+            this.Controls.Add(_btnSync);
+
+            _lblSyncDesc = new Label();
+            _lblSyncDesc.Font = new Font("Segoe UI", 8f, FontStyle.Regular);
+            _lblSyncDesc.ForeColor = Color.FromArgb(148, 155, 164);
+            _lblSyncDesc.Location = new Point(27, 304);
+            _lblSyncDesc.AutoSize = true;
+            this.Controls.Add(_lblSyncDesc);
+
             // 底部回饋提示區
             _lblFeedback = new Label();
             _lblFeedback.Font = new Font("Segoe UI", 8.5f, FontStyle.Regular);
             _lblFeedback.ForeColor = Color.FromArgb(180, 185, 192);
-            _lblFeedback.Location = new Point(25, 270);
-            _lblFeedback.Size = new Size(350, 45);
+            _lblFeedback.Location = new Point(25, 350);
+            _lblFeedback.Size = new Size(350, 60);
             this.Controls.Add(_lblFeedback);
         }
 
@@ -207,6 +230,10 @@ namespace VencordFix
             _lblStartupDesc.Text = isZh 
                 ? "開機在後台自動監控，Discord 更新時即時修補。" 
                 : "Monitors Discord on Windows startup and patches updates silently.";
+
+            _lblSyncDesc.Text = isZh
+                ? "點捷徑時先同步官方最新版，啟動後不再出現「點此重啟」提示。"
+                : "Syncs the latest official build before launch, so no restart prompt appears.";
 
             RefreshState();
             UpdateFeedback();
@@ -250,6 +277,23 @@ namespace VencordFix
                 _btnStartup.BackColor = Color.FromArgb(78, 80, 88); // 灰色
                 _btnStartup.ForeColor = Color.White;
             }
+
+            if (FixConfig.SyncBuilds)
+            {
+                _btnSync.Text = isZh
+                    ? "3. 啟動前同步 Vencord 最新版 [已開啟] (點擊關閉)"
+                    : "3. Pre-launch Vencord Sync [Active] (Click to turn off)";
+                _btnSync.BackColor = Color.FromArgb(35, 165, 89); // 綠色
+                _btnSync.ForeColor = Color.White;
+            }
+            else
+            {
+                _btnSync.Text = isZh
+                    ? "3. 啟動前同步 Vencord 最新版 [未開啟] (點擊開啟)"
+                    : "3. Pre-launch Vencord Sync [Disabled] (Click to enable)";
+                _btnSync.BackColor = Color.FromArgb(78, 80, 88); // 灰色
+                _btnSync.ForeColor = Color.White;
+            }
         }
 
         private void UpdateFeedback()
@@ -288,6 +332,24 @@ namespace VencordFix
                         : "Failed to update startup setting.";
                     _lblFeedback.ForeColor = Color.FromArgb(237, 66, 69);
                     break;
+                case FeedbackState.SyncEnabled:
+                    _lblFeedback.Text = isZh
+                        ? "成功：啟動前會自動同步官方最新 Vencord，不會再出現重啟提示！"
+                        : "Success: The latest official Vencord will be synced before each launch!";
+                    _lblFeedback.ForeColor = Color.FromArgb(35, 165, 89);
+                    break;
+                case FeedbackState.SyncDisabled:
+                    _lblFeedback.Text = isZh
+                        ? "已關閉啟動前同步，改由 Vencord 自行更新（可能仍會提示重啟）。"
+                        : "Pre-launch sync disabled. Vencord will update itself (a restart prompt may appear).";
+                    _lblFeedback.ForeColor = Color.FromArgb(242, 243, 245);
+                    break;
+                case FeedbackState.SyncFail:
+                    _lblFeedback.Text = isZh
+                        ? "儲存設定失敗，請檢查權限。"
+                        : "Failed to save settings. Please check permissions.";
+                    _lblFeedback.ForeColor = Color.FromArgb(237, 66, 69);
+                    break;
                 case FeedbackState.Initial:
                 default:
                     _lblFeedback.Text = isZh 
@@ -319,6 +381,23 @@ namespace VencordFix
             {
                 _feedbackState = FeedbackState.StartupFail;
             }
+            UpdateFeedback();
+        }
+
+        private void BtnSync_Click(object sender, EventArgs e)
+        {
+            FixConfig.SyncBuilds = !FixConfig.SyncBuilds;
+
+            if (FixConfig.Save())
+            {
+                _feedbackState = FixConfig.SyncBuilds ? FeedbackState.SyncEnabled : FeedbackState.SyncDisabled;
+                RefreshState();
+            }
+            else
+            {
+                _feedbackState = FeedbackState.SyncFail;
+            }
+
             UpdateFeedback();
         }
     }

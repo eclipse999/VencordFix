@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace VencordFix
 {
@@ -42,6 +43,14 @@ namespace VencordFix
                     FileInfo fi = new FileInfo(appAsar);
                     if (fi.Length < 200000)
                     {
+                        string injectedPath;
+                        if (TryGetInjectedPatcherPath(appAsar, out injectedPath))
+                        {
+                            // app.asar 只是注入器 (stub)；若它指向的 Vencord 檔案不存在，
+                            // Discord 會啟動失敗，此時必須重新執行修補。
+                            return File.Exists(injectedPath);
+                        }
+
                         return true;
                     }
                 }
@@ -52,6 +61,70 @@ namespace VencordFix
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 解析 Vencord 注入器 app.asar 的內容，取得實際載入的 patcher.js 路徑。
+        /// 注入器內容形如：
+        /// {"files":{...}}require("C:\\Users\\...\\Vencord\\dist\\patcher.js"){"name":"discord","main":"index.js"}
+        /// </summary>
+        public static bool TryGetInjectedPatcherPath(string appAsarPath, out string patcherPath)
+        {
+            patcherPath = null;
+
+            try
+            {
+                if (string.IsNullOrEmpty(appAsarPath) || !File.Exists(appAsarPath))
+                {
+                    return false;
+                }
+
+                byte[] buffer;
+                using (FileStream stream = new FileStream(appAsarPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    int length = (int)Math.Min(stream.Length, 8192);
+                    buffer = new byte[length];
+
+                    int total = 0;
+                    while (total < length)
+                    {
+                        int chunk = stream.Read(buffer, total, length - total);
+                        if (chunk <= 0)
+                        {
+                            break;
+                        }
+                        total += chunk;
+                    }
+                }
+
+                string text = Encoding.UTF8.GetString(buffer);
+                const string marker = "require(\"";
+                int start = text.IndexOf(marker, StringComparison.Ordinal);
+                if (start < 0)
+                {
+                    return false;
+                }
+
+                start += marker.Length;
+                int end = text.IndexOf('"', start);
+                if (end <= start)
+                {
+                    return false;
+                }
+
+                string raw = text.Substring(start, end - start).Replace("\\\\", "\\");
+                if (raw.IndexOf(".js", StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    return false;
+                }
+
+                patcherPath = raw;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public void KillProcesses()

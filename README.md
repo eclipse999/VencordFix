@@ -37,6 +37,7 @@
 - [Repository Structure](#repository-structure)
 - [Quick Start Guide](#quick-start-guide)
 - [Command-Line Arguments](#command-line-arguments)
+- [Why "Click here to restart" No Longer Appears](#why-click-here-to-restart-no-longer-appears)
 - [Antivirus and False Positive Notice](#antivirus-and-false-positive-notice)
 - [Build from Source](#build-from-source)
 - [Disclaimer](#disclaimer)
@@ -51,19 +52,21 @@ Whenever Discord updates in the background on Windows, its updater creates a new
 **VencordFix** automates this entire lifecycle:
 - **Instant Launch When Patched**: Checks the patch state in under 10ms and immediately launches Discord without internet delays.
 - **Auto-Patch After Updates**: When an unpatched version is detected, it automatically downloads the latest official `VencordInstallerCli.exe` from GitHub, applies the patch, cleans up the downloaded file, and launches Discord.
+- **No More "Click here to restart"**: Before launching, the installed Vencord build in `%AppData%\Vencord\dist` is compared with the official latest release and synced when outdated, so Vencord never stops halfway to ask for a restart.
 - **Background Watcher**: Can optionally run as a background watcher or system tray service to patch Discord immediately when an update folder is created.
 
 ---
 
 ## Features
 
-- **Minimalist GUI**: Lightweight 2-button setup window to create desktop shortcuts or enable startup watcher in seconds.
+- **Minimalist GUI**: Lightweight 3-button setup window to create desktop shortcuts, enable the startup watcher, or toggle pre-launch Vencord syncing in seconds.
 - **Fast Verification**: Inspects Discord's version directory and `resources\_app.asar` state directly (< 10ms).
 - **Official Releases**: Downloads the latest installer from the [official Vencord repository](https://github.com/Vencord/Installer).
-- **Clean File Management**: Downloaded installer files are deleted immediately after execution via `finally` blocks.
+- **Pre-launch Build Sync**: Reads the installed Vencord build hash from `%AppData%\Vencord\dist\patcher.js` (the same method the official installer uses) and downloads the official release assets only when they differ.
+- **Clean File Management**: Downloaded installer files are deleted immediately after execution, with retries and leftover purging.
 - **Multi-Branch Support**: Supports Discord (Stable), Discord PTB, Discord Canary, and Discord Development.
 - **Antivirus Safe**: Uses a dedicated AppData path (`%LocalAppData%\VencordFix\temp\`) instead of `%TEMP%` to avoid heuristic dropper warnings.
-- **Zero Dependencies**: Includes a pre-compiled standalone binary `bin\VencordFix.exe` (~55KB) with embedded icons and an open-source PowerShell script.
+- **Zero Dependencies**: Includes a pre-compiled standalone binary `bin\VencordFix.exe` (~75KB) with embedded icons and an open-source PowerShell script.
 
 ---
 
@@ -72,12 +75,17 @@ Whenever Discord updates in the background on Windows, its updater creates a new
 ```mermaid
 flowchart TD
     A["Launch Discord<br/>(Shortcut / Watcher)"] --> B{"Check Discord<br/>Patch Status"}
-    B -->|Already Patched| C["Instant Launch<br/>(&lt; 10ms, no delay)"]
     B -->|Unpatched / Updated| D["Close Discord<br/>(Release files)"]
     D --> E["Download Latest<br/>Vencord Installer"]
     E --> F["Apply Auto-Patch<br/>(-install)"]
     F --> G["Delete Installer<br/>(Zero-trace cleanup)"]
     G --> H["Launch Discord<br/>(Vencord Active)"]
+    B -->|Already Patched| I{"Installed Vencord Build<br/>vs Official Latest"}
+    I -->|Up to date| C["Instant Launch<br/>(&lt; 10ms, no delay)"]
+    I -->|Outdated| J["Close Discord<br/>(Apply new build)"]
+    J --> K["Download Official<br/>Vencord Build Files"]
+    K --> L["Replace Vencord dist<br/>(%AppData%)"]
+    L --> H
 ```
 
 ---
@@ -101,6 +109,8 @@ VencordFix/
 │   ├── MainForm.cs                     # Minimalist graphical setup interface
 │   ├── DiscordApp.cs                   # Detection and process management
 │   ├── VencordInstaller.cs             # Download, patch, and cleanup logic
+│   ├── VencordBuildSync.cs             # Pre-launch Vencord build comparison and sync
+│   ├── FixConfig.cs                    # User settings stored in %LocalAppData%
 │   ├── WatcherService.cs               # FileSystemWatcher for update monitoring
 │   ├── ShortcutHelper.cs               # Shortcut and startup registry helpers
 │   └── AssemblyInfo.cs                 # Assembly metadata
@@ -120,9 +130,10 @@ VencordFix/
 ### Option 1: Minimalist GUI Setup (Recommended for Non-Technical Users)
 
 1. Double-click **`VencordFix.exe`** (or run `Run.bat`).
-2. A clean setup window will appear with two main options:
+2. A clean setup window will appear with three main options:
    - **Click `1. Create Desktop Shortcut`**: Creates a `Discord (VencordFix)` shortcut on your Desktop. From now on, launch Discord from this shortcut—it automatically verifies and patches Vencord before launching.
    - **Click `2. Background Startup Watcher`**: Silently monitors Discord in the background on Windows startup, automatically patching Vencord as soon as Discord updates.
+   - **Click `3. Pre-launch Vencord Sync`** (enabled by default): Syncs the latest official Vencord build before Discord starts, so the "VENCORD HAS BEEN UPDATED! Click here to restart" popup never appears.
 3. Close the window. Setup is complete!
 
 ---
@@ -142,6 +153,9 @@ bin\VencordFix.exe --force
 
 # Run in System Tray background mode
 bin\VencordFix.exe --tray
+
+# Show patch state and Vencord build diagnostics
+bin\VencordFix.exe --status
 ```
 
 ---
@@ -153,6 +167,10 @@ bin\VencordFix.exe --tray
 | `-b, --branch <branch>` | `-b` | Discord branch (`auto`, `stable`, `ptb`, `canary`, `dev`). Default: `auto` |
 | `-f, --force` | `-f` | Force re-downloading and re-patching Vencord |
 | `--no-launch` | | Check and patch only; do not start Discord afterwards |
+| `--sync-builds` | | Sync the latest official Vencord build before launching (default: on) |
+| `--no-sync-builds` | | Disable the pre-launch build sync and let Vencord update itself |
+| `--check-interval <min>` | | Cache TTL for the release check; `0` = always check (default: `0`) |
+| `--status` | | Print patch state and Vencord version diagnostics, then exit |
 | `--openasar` | | Install OpenAsar along with Vencord |
 | `-w, --watch` | `-w` | Run real-time console watcher mode (Ctrl+C to stop) |
 | `--tray` | | Run in Windows System Tray background mode |
@@ -161,6 +179,30 @@ bin\VencordFix.exe --tray
 | `--uninstall-startup` | | Remove Windows Startup entry |
 | `-s, --silent` | `-s` | Silent mode (suppress console output) |
 | `-h, --help` | `-h` | Display help screen |
+
+---
+
+## Why "Click here to restart" No Longer Appears
+
+Vencord ships with its own auto-updater. When it runs, it only checks GitHub *after* Discord has already started:
+
+1. `VencordFix` sees that `app.asar` (a ~218-byte injector) is patched and launches Discord immediately.
+2. The old Vencord build inside `%AppData%\Vencord\dist` is loaded into memory.
+3. That old build notices a newer official release, downloads the new files over itself, and asks for a restart—because the code in memory is still the old one.
+
+Because `VencordFix` now performs the same comparison *before* launching (using the `// Vencord <hash>` banner in `patcher.js`, exactly like the official installer), Discord is always started with the newest build loaded, so the popup never has a reason to appear. If Discord is already running when an update is detected, it is restarted automatically as part of the same click.
+
+Files involved:
+
+| Path | Purpose |
+| :--- | :--- |
+| `%AppData%\Vencord\dist\*.js` | The actual Vencord code that Discord loads |
+| `%LocalAppData%\VencordFix\config.json` | `{"syncBuilds":true,"checkIntervalMinutes":0}` |
+| `%LocalAppData%\VencordFix\cache\vencord-release.json` | Last fetched release metadata |
+
+> Run `VencordFix.exe --status` to see the installed and latest build hashes, the detected injector target, and the current sync settings.
+
+> Prefer to stay on an older Vencord build? Turn option **3** off (or pass `--no-sync-builds`); VencordFix will then leave `%AppData%\Vencord\dist` completely untouched.
 
 ---
 
